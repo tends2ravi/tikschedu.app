@@ -1,0 +1,68 @@
+:root {
+    --tiktok-pink: #FF0050;
+    --tiktok-black: #000000;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    background: #f5f5f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.tiktok-btn {
+    background: var(--tiktok-pink);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-label {
+    background: #f0f2f5;
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    border: 2px dashed #ccc;
+}
+
+#video-preview {
+    width: 100%;
+    max-width: 400px;
+    margin: 1rem 0;
+}
+
+.code-display {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    word-break: break-all;
+}
