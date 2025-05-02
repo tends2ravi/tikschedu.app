@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Scheduler</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="login-section" class="card">
+            <h1>TikTok Video Scheduler</h1>
+            <button id="login-btn" class="tiktok-btn">
+                <img src="/assets/tiktok-icon.svg" alt=""> Login with TikTok
+            </button>
+        </div>
+
+        <!-- Upload Form (Hidden Initially) -->
+        <div id="upload-section" class="card" style="display: none;">
+            <h2>Schedule New Video</h2>
+            <form id="upload-form">
+                <div class="form-group">
+                    <input type="file" id="video-file" accept="video/mp4" required>
+                    <label for="video-file" class="file-label">Select Video</label>
+                </div>
+                
+                <div class="form-group">
+                    <input type="text" id="video-title" placeholder="Video Title" required>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="video-desc" placeholder="Video Description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Schedule Time</label>
+                    <input type="datetime-local" id="schedule-time" required>
+                </div>
+
+                <button type="submit" class="tiktok-btn">Schedule Video</button>
+            </form>
+        </div>
+
+        <!-- Confirmation Section (Hidden Initially) -->
+        <div id="confirmation-section" class="card" style="display: none;">
+            <h2>🎉 Video Scheduled Successfully!</h2>
+            <p>Your video will be posted on <span id="scheduled-time"></span></p>
+            <div class="video-preview" id="video-preview"></div>
+        </div>
+
+        <!-- Auth Code Display (Existing Functionality) -->
+        <div id="auth-code-section" class="card" style="display: none;">
+            <h3>Authorization Code</h3>
+            <div class="code-display">
+                <code id="auth-code"></code>
+                <button onclick="copyCode()">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
