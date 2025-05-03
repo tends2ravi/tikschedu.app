@@ -3,182 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Scheduler</title>
+    <title>TikTok Video Scheduler</title>
     <style>
-        /* Minimal CSS included directly in HTML */
+        :root {
+            --tiktok-pink: #FF0050;
+            --tiktok-black: #000;
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 2rem;
+            background: #f8f9fa;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-color: #f8f9fa;
         }
+
         .container {
-            text-align: center;
-            background-color: white;
+            background: white;
+            max-width: 600px;
+            width: 100%;
+            padding: 2rem;
             border-radius: 12px;
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
         }
+
         .logo {
             width: 80px;
-            margin-bottom: 20px;
+            margin: 0 auto 2rem;
+            display: block;
         }
-        h1 {
-            margin-bottom: 30px;
-            color: #333;
-        }
-        .tiktok-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background-color: black;
-            color: white;
-            font-weight: 600;
+
+        .btn {
             padding: 12px 24px;
             border-radius: 8px;
             border: none;
             cursor: pointer;
-            font-size: 16px;
-            margin: 0 auto;
+            font-weight: 500;
             transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .tiktok-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        .tiktok-icon {
-            width: 20px;
-            height: 20px;
-        }
-        .auth-section {
-            display: none;
-            margin-top: 20px;
-        }
-        .code-display {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            text-align: left;
-            position: relative;
-            word-break: break-all;
-            margin: 20px 0;
-        }
-        .copy-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: #FF0050;
+
+        .btn-tiktok {
+            background: var(--tiktok-black);
             color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
         }
-        .success {
-            color: #198754;
-            font-weight: bold;
+
+        .btn-tiktok:hover {
+            opacity: 0.9;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            padding: 2rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            color: var(--success-green);
+        }
+
+        .alert-error {
+            background: #fee;
+            color: var(--error-red);
+        }
+
+        .token-display {
+            background: #f1f3f5;
+            padding: 1rem;
+            border-radius: 8px;
+            word-break: break-all;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Login Section - Shown initially -->
-        <div id="login-section">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyOCAyOCI+PHBhdGggZmlsbD0iIzI1RjRFRSIgZD0iTTkuOTQgOC4yYzIuMTEtLjA1IDQuMjEgMS4yNSA1LjE2IDMuMTdWNy41N0gxNmM3LjQgMCAxMiA2LjY1IDEyIDE2LjA4YS43LjcgMCAwIDEtMS4xNi41MyA5LjA1IDkuMDUgMCAwIDAtOC42NS0xLjc0Ljc3Ljc3IDAgMCAxLS45Ni0uNzJWMTEuNWMtLjU4LTMuNTUtMy41Ni01LjE3LTcuNDEtMy45M2EuNzkuNzkgMCAwIDEtLjg4LS43NXoiLz48cGF0aCBmaWxsPSIjRkUyQzcyIiBkPSJNMjMuOTUgNS44OGE3LjI5IDcuMjkgMCAwIDAtNS40Mi0xLjdWNWMwLS4zNy0uMTctLjcyLS40OC0uOTRhMS4yIDEuMiAwIDAgMC0xLjIyLS4xMSA3Ljk1IDcuOTUgMCAwIDEtNy41LTEuODQuNzkuNzkgMCAwIDAtLjY1LS4xOC43OC43OCAwIDAgMC0uNTMuMzlBLjc4Ljc4IDAgMCAwIDggMyAyMS45NiAyMS45NiAwIDAgMSA1LjkgMTkuODhhLjc5Ljc5IDAgMCAwLTEuMDktLjI4Ljc3Ljc3IDAgMCAwLS4zOC42NkM0LjQzIDI2Ljg1IDkuNyAzMiAxNiAzMmEuNzkuNzkgMCAwIDAgLjc5LS43OVYyMS4zOWEuNzkuNzkgMCAwIDAtLjU1LS43NSAxMC43OCAxMC43OCAwIDAgMC05LjEzIDIuMi43OC43OCAwIDAgMS0xLjI0LS44YzIuMzMtNC40OSA2LjkxLTkuODkgMTguNjEtNy40QS41OS41OSAwIDAgMCAyNSAxNGMwLTQuMDEtMS4wMS03LjA2LTIuNjYtOS4wN2EuNzguNzggMCAwIDEgLjI1LTEuMTcuNzkuNzkgMCAwIDEgMS4wNi4yNiAxMS41OCAxMS41OCAwIDAgMSAyLjM1IDYuNTMuNzkuNzkgMCAwIDAgLjU5Ljc2LjguOCAwIDAgMCAuODYtLjI1IDguODMgOC44MyAwIDAgMC0zLjUtNS4xOHoiLz48L3N2Zz4=" alt="TikTok" class="logo">
+        <!-- TikTok Logo -->
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTE2LjYgNS44MmMtLjY3IDAtMS4yNi4yOC0xLjY5LjY5bC0uMDEtLjAxYy0uNDMtLjQxLS45OC0uNjgtMS42NS0uNjhoLTMuODdjLS42NyAwLTEuMjYuMjctMS42OS42OGwtLjAxLjAxYy0uNDMuNDEtLjk4LjY5LTEuNjUuNjlINi41Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNXY3YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41aDExYzEuMzggMCAyLjUtMS4xMiAyLjUtMi41di03YzAtMS4zOC0xLjEyLTIuNS0yLjUtMi41aC0xLjR6bS0uNjMgNC4zN2MuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3oiLz48L3N2Zz4=" 
+             alt="TikTok Logo" 
+             class="logo">
+
+        <!-- Login Section -->
+        <div id="login-section" class="section active">
             <h1>TikTok Video Scheduler</h1>
-            <button id="login-btn" class="tiktok-btn">Continue with TikTok</button>
+            <p>Securely connect your account to schedule videos</p>
+            <button class="btn btn-tiktok" id="login-btn">
+                Continue with TikTok
+            </button>
         </div>
-        
-        <!-- Auth Code Section - Shown after redirect -->
-        <div id="auth-section" class="auth-section">
-            <h2>Authorization Successful!</h2>
-            <p class="success">Your TikTok authorization code has been captured.</p>
-            
-            <h3>Your Authorization Code:</h3>
-            <div class="code-display">
-                <span id="auth-code">Loading...</span>
-                <button class="copy-btn" onclick="copyCode()">Copy</button>
+
+        <!-- Loading State -->
+        <div id="loading-section" class="loading">
+            <p>Connecting to TikTok...</p>
+        </div>
+
+        <!-- Error Section -->
+        <div id="error-section" class="section alert alert-error"></div>
+
+        <!-- Success Section -->
+        <div id="success-section" class="section">
+            <div class="alert alert-success">
+                <h2>Authorization Successful! 🎉</h2>
+                <p>Your authorization code is ready</p>
             </div>
             
-            <p><strong>State:</strong> <span id="state-param">Loading...</span></p>
-            <p>You can now close this window and continue with your application.</p>
+            <div class="token-display">
+                <strong>Code:</strong>
+                <span id="auth-code"></span>
+                <button class="btn" onclick="copyCode()" style="margin-top: 1rem">
+                    Copy Code
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        // Handle page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
-            
-            // Check if we're in callback mode
-            if (code) {
-                // Show auth section
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('auth-section').style.display = 'block';
+        // Configuration
+        const CLIENT_KEY = 'sbawbj2jcdabtqkzi0'; // Replace with your client key
+        const REDIRECT_URI = window.location.href.split('?')[0];
+
+        // Elements
+        const sections = {
+            login: document.getElementById('login-section'),
+            loading: document.getElementById('loading-section'),
+            error: document.getElementById('error-section'),
+            success: document.getElementById('success-section')
+        };
+
+        // PKCE Generators
+        function generateCodeVerifier() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+            return Array.from(crypto.getRandomValues(new Uint8Array(64)))
+                .map(byte => chars[byte % chars.length])
+                .join('');
+        }
+
+        async function generateCodeChallenge(verifier) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(verifier);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return btoa(String.fromCharCode(...new Uint8Array(digest)))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        // OAuth Flow
+        async function startOAuth() {
+            try {
+                showSection('loading');
                 
-                // Display code and state
-                document.getElementById('auth-code').textContent = code;
-                document.getElementById('state-param').textContent = state || 'Not provided';
+                const state = generateCodeVerifier().slice(0, 16);
+                const codeVerifier = generateCodeVerifier();
+                const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+                sessionStorage.setItem('pkce_state', state);
+                sessionStorage.setItem('pkce_verifier', codeVerifier);
+
+                const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize');
+                authUrl.searchParams.append('client_key', CLIENT_KEY);
+                authUrl.searchParams.append('response_type', 'code');
+                authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
+                authUrl.searchParams.append('scope', 'user.info.basic,video.upload');
+                authUrl.searchParams.append('state', state);
+                authUrl.searchParams.append('code_challenge', codeChallenge);
+                authUrl.searchParams.append('code_challenge_method', 'S256');
+
+                window.location.href = authUrl.toString();
+            } catch (error) {
+                showError('Failed to start authorization: ' + error.message);
             }
-            
-            // Set up login button
-            document.getElementById('login-btn').addEventListener('click', initiateOAuth);
-        });
-        
-        // Start OAuth flow
-        function initiateOAuth() {
-            // Generate state for security
-            const state = generateRandomString(16);
-            
-            // Build auth URL (replace with your client key)
-            const params = new URLSearchParams({
-                client_key: 'sbawbj2jcdabtqkzi0', // Replace with your client key
-                response_type: 'code',
-                redirect_uri: window.location.href,
-                scope: 'video.upload,user.info.basic,video.publish',
-                state: state
-            });
-            
-            // Redirect to TikTok
-            window.location.href = `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
         }
-        
-        // Generate random string for state parameter
-        function generateRandomString(length) {
-            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            let text = '';
-            for (let i = 0; i < length; i++) {
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        // Handle Callback
+        function handleCallback() {
+            const params = new URLSearchParams(window.location.search);
+            
+            if (params.has('error')) {
+                showError(`${params.get('error')}: ${params.get('error_description')}`);
+                return;
             }
-            return text;
+
+            if (!params.has('code')) return;
+
+            const code = params.get('code');
+            const state = params.get('state');
+            const storedState = sessionStorage.getItem('pkce_state');
+
+            if (state !== storedState) {
+                showError('Security alert: State mismatch detected');
+                return;
+            }
+
+            document.getElementById('auth-code').textContent = code;
+            showSection('success');
         }
-        
-        // Copy authorization code
+
+        // UI Functions
+        function showSection(section) {
+            Object.values(sections).forEach(s => s.classList.remove('active'));
+            document.getElementById(`${section}-section`).classList.add('active');
+        }
+
+        function showError(message) {
+            sections.error.textContent = message;
+            showSection('error');
+        }
+
         function copyCode() {
-            const codeText = document.getElementById('auth-code').textContent;
-            navigator.clipboard.writeText(codeText)
+            const code = document.getElementById('auth-code').textContent;
+            navigator.clipboard.writeText(code)
                 .then(() => alert('Code copied to clipboard!'))
                 .catch(() => {
-                    // Fallback for browsers that don't support clipboard API
                     const textArea = document.createElement('textarea');
-                    textArea.value = codeText;
+                    textArea.value = code;
                     document.body.appendChild(textArea);
                     textArea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
-                    alert('Code copied to clipboard!');
+                    alert('Code copied!');
                 });
         }
+
+        // Initialization
+        document.getElementById('login-btn').addEventListener('click', startOAuth);
+        window.addEventListener('load', handleCallback);
     </script>
 </body>
 </html>
