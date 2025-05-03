@@ -6,7 +6,19 @@
     <meta name="description" content="This is a site aimed at helping you learn how to easily integrate and use the TikTok API.">
     <meta name="theme-color" content="#000000">
     <title>Tikdash Login</title>
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTE2LjYgNS44MmMtLjY3IDAtMS4yNi4yOC0xLjY5LjY5bC0uMDEtLjAxYy0uNDMtLjQxLS45OC0uNjgtMS42NS0uNjhoLTMuODdjLS42NyAwLTEuMjYuMjctMS42OS42OGwtLjAxLjAxYy0uNDMuNDEtLjk4LjY5LTEuNjUuNjlINi41Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNXY3YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41aDExYzEuMzggMCAyLjUtMS4xMiAyLjUtMi41di03YzAtMS4zOC0xLjEyLTIuNS0yLjUtMi41aC0xLjR6bS0uNjMgNC4zN2MuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3oiLz48L3N2Zz4=">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTE2LjYgNS44MmMtLjY3IDAtMS4yNi4yOC0xLjY5LjY5bC0uMDEtLjAxYy0uNDMtLjQxLS45OC0uNjgtMS42NS0uNjhoLTMuODdjLS42NyAwLTEuMjYuMjctMS42OS42OGwtLjAxLjAxYy0uNDMuNDEtLjk4LjY5LTEuNjUuNjlINi41Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNXY3YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41aDExYzEuMzggMCAyLjUtMS4xMiAyLjUtMi41di03YzAtMS4zOC0xLjEyLTIuNS0yLjUtMi41aC0xLjR6bS0uNjMgNC4zN2MuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3oiLz48L3N2Zz4=">
+    <!-- Prevent flash of unstyled content during theme load -->
+    <script>
+        // Immediately apply theme preference to prevent flicker
+        (function() {
+            const savedTheme = localStorage.getItem('darkMode');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'enabled' || (savedTheme === null && systemPrefersDark)) {
+                document.documentElement.classList.add('dark-mode');
+            }
+        })();
+    </script>
     <style>
         :root {
             --tiktok-pink: #FF0050;
@@ -38,6 +50,15 @@
             }
         }
 
+        /* Add CSS rule for manual dark mode toggle */
+        body.dark-mode,
+        html.dark-mode {
+            --bg-color: var(--bg-dark);
+            --text-color: var(--text-dark);
+            --container-color: var(--container-dark);
+            --code-bg: var(--code-bg-dark);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
@@ -48,7 +69,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
 
         .container {
@@ -59,7 +80,7 @@
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             text-align: center;
-            transition: background-color 0.3s;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
         }
 
         .logo {
@@ -281,6 +302,44 @@
             cursor: pointer;
             padding: 5px;
             font-size: 1.2rem;
+            z-index: 100;
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+            background-color: rgba(128, 128, 128, 0.1);
+        }
+
+        .theme-toggle svg {
+            position: absolute;
+            transition: opacity 0.3s ease, transform 0.5s ease;
+        }
+
+        #sun-icon {
+            opacity: 0;
+            transform: scale(0.7);
+        }
+
+        #moon-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .dark-mode #sun-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .dark-mode #moon-icon {
+            opacity: 0;
+            transform: scale(0.7);
         }
 
         @keyframes fadeIn {
@@ -319,7 +378,7 @@
 </head>
 <body>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
             <circle cx="12" cy="12" r="5"></circle>
             <line x1="12" y1="1" x2="12" y2="3"></line>
             <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -330,11 +389,14 @@
             <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
         </svg>
+        <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
     </button>
 
     <div class="container">
         <!-- TikTok Logo -->
-        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGMDUwMCIgZD0iTTE2LjYgNS44MmMtLjY3IDAtMS4yNi4yOC0xLjY5LjY5bC0uMDEtLjAxYy0uNDMtLjQxLS45OC0uNjgtMS42NS0uNjhoLTMuODdjLS42NyAwLTEuMjYuMjctMS42OS42OGwtLjAxLjAxYy0uNDMuNDEtLjk4LjY5LTEuNjUuNjlINi41Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNXY3YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41aDExYzEuMzggMCAyLjUtMS4xMiAyLjUtMi41di03YzAtMS4zOC0xLjEyLTIuNS0yLjUtMi41aC0xLjR6bS0uNjMgNC4zN2MuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3oiLz48L3N2Zz4=" 
+        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0ZGMDUwMCIgZD0iTTE2LjYgNS44MmMtLjY3IDAtMS4yNi4yOC0xLjY5LjY5bC0uMDEtLjAxYy0uNDMtLjQxLS45OC0uNjgtMS42NS0uNjhoLTMuODdjLS42NyAwLTEuMjYuMjctMS42OS42OGwtLjAxLjAxYy0uNDMuNDEtLjk4LjY5LTEuNjUuNjlINi41Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNXY3YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41aDExYzEuMzggMCAyLjUtMS4xMiAyLjUtMi41di03YzAtMS4zOC0xLjEyLTIuNS0yLjUtMi41aC0xLjR6bS0uNjMgNC4zN2MuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3ptLTMuNTQgMGMuMzkgMCAuNy4zMS43LjcgMCAuMzktLjMxLjctLjcuNy0uMzkgMC0uNy0uMzEtLjctLjcgMC0uMzkuMzEtLjcuNy0uN3oiLz48L3N2Zz4=" 
              alt="TikTok Logo" 
              class="logo">
 
@@ -410,18 +472,45 @@
         // Dark mode toggle
         const themeToggle = document.getElementById('theme-toggle');
         const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
         
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
+            document.documentElement.classList.toggle('dark-mode');
+            
             const isDarkMode = document.body.classList.contains('dark-mode');
             localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled');
+            
+            // Toggle icon visibility
+            updateThemeIcon(isDarkMode);
+            
+            // Debug message to console
+            console.log('Dark mode toggled:', isDarkMode ? 'enabled' : 'disabled');
+        }
+        
+        function updateThemeIcon(isDarkMode) {
+            // We'll use CSS for the transition now instead of display changes
+            // This is now just kept for backwards compatibility or if needed
+            console.log('Theme icons updated via CSS');
         }
 
         // Check for saved user preference and system preference
-        if (localStorage.getItem('darkMode') === 'enabled' || 
-            (localStorage.getItem('darkMode') === null && prefersDarkScheme.matches)) {
+        const savedTheme = localStorage.getItem('darkMode');
+        const systemPrefersDark = prefersDarkScheme.matches;
+        let isDarkMode = false;
+        
+        if (savedTheme === 'enabled' || (savedTheme === null && systemPrefersDark)) {
             document.body.classList.add('dark-mode');
+            document.documentElement.classList.add('dark-mode');
+            isDarkMode = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.documentElement.classList.remove('dark-mode');
         }
+        
+        // Initialize the correct icon
+        updateThemeIcon(isDarkMode);
         
         themeToggle.addEventListener('click', toggleDarkMode);
 
