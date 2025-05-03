@@ -4,61 +4,181 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TikTok Scheduler</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        /* Minimal CSS included directly in HTML */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .logo {
+            width: 80px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .tiktok-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: black;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 auto;
+            transition: all 0.2s;
+        }
+        .tiktok-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        .tiktok-icon {
+            width: 20px;
+            height: 20px;
+        }
+        .auth-section {
+            display: none;
+            margin-top: 20px;
+        }
+        .code-display {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            text-align: left;
+            position: relative;
+            word-break: break-all;
+            margin: 20px 0;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #FF0050;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .success {
+            color: #198754;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Login Section -->
-        <div id="login-section" class="card">
+        <!-- Login Section - Shown initially -->
+        <div id="login-section">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyOCAyOCI+PHBhdGggZmlsbD0iIzI1RjRFRSIgZD0iTTkuOTQgOC4yYzIuMTEtLjA1IDQuMjEgMS4yNSA1LjE2IDMuMTdWNy41N0gxNmM3LjQgMCAxMiA2LjY1IDEyIDE2LjA4YS43LjcgMCAwIDEtMS4xNi41MyA5LjA1IDkuMDUgMCAwIDAtOC42NS0xLjc0Ljc3Ljc3IDAgMCAxLS45Ni0uNzJWMTEuNWMtLjU4LTMuNTUtMy41Ni01LjE3LTcuNDEtMy45M2EuNzkuNzkgMCAwIDEtLjg4LS43NXoiLz48cGF0aCBmaWxsPSIjRkUyQzcyIiBkPSJNMjMuOTUgNS44OGE3LjI5IDcuMjkgMCAwIDAtNS40Mi0xLjdWNWMwLS4zNy0uMTctLjcyLS40OC0uOTRhMS4yIDEuMiAwIDAgMC0xLjIyLS4xMSA3Ljk1IDcuOTUgMCAwIDEtNy41LTEuODQuNzkuNzkgMCAwIDAtLjY1LS4xOC43OC43OCAwIDAgMC0uNTMuMzlBLjc4Ljc4IDAgMCAwIDggMyAyMS45NiAyMS45NiAwIDAgMSA1LjkgMTkuODhhLjc5Ljc5IDAgMCAwLTEuMDktLjI4Ljc3Ljc3IDAgMCAwLS4zOC42NkM0LjQzIDI2Ljg1IDkuNyAzMiAxNiAzMmEuNzkuNzkgMCAwIDAgLjc5LS43OVYyMS4zOWEuNzkuNzkgMCAwIDAtLjU1LS43NSAxMC43OCAxMC43OCAwIDAgMC05LjEzIDIuMi43OC43OCAwIDAgMS0xLjI0LS44YzIuMzMtNC40OSA2LjkxLTkuODkgMTguNjEtNy40QS41OS41OSAwIDAgMCAyNSAxNGMwLTQuMDEtMS4wMS03LjA2LTIuNjYtOS4wN2EuNzguNzggMCAwIDEgLjI1LTEuMTcuNzkuNzkgMCAwIDEgMS4wNi4yNiAxMS41OCAxMS41OCAwIDAgMSAyLjM1IDYuNTMuNzkuNzkgMCAwIDAgLjU5Ljc2LjguOCAwIDAgMCAuODYtLjI1IDguODMgOC44MyAwIDAgMC0zLjUtNS4xOHoiLz48L3N2Zz4=" alt="TikTok" class="logo">
             <h1>TikTok Video Scheduler</h1>
-            <button id="login-btn" class="tiktok-btn">
-                <img src="/assets/tiktok-icon.svg" alt=""> Login with TikTok
-            </button>
+            <button id="login-btn" class="tiktok-btn">Continue with TikTok</button>
         </div>
-
-        <!-- Upload Form (Hidden Initially) -->
-        <div id="upload-section" class="card" style="display: none;">
-            <h2>Schedule New Video</h2>
-            <form id="upload-form">
-                <div class="form-group">
-                    <input type="file" id="video-file" accept="video/mp4" required>
-                    <label for="video-file" class="file-label">Select Video</label>
-                </div>
-                
-                <div class="form-group">
-                    <input type="text" id="video-title" placeholder="Video Title" required>
-                </div>
-
-                <div class="form-group">
-                    <textarea id="video-desc" placeholder="Video Description"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Schedule Time</label>
-                    <input type="datetime-local" id="schedule-time" required>
-                </div>
-
-                <button type="submit" class="tiktok-btn">Schedule Video</button>
-            </form>
-        </div>
-
-        <!-- Confirmation Section (Hidden Initially) -->
-        <div id="confirmation-section" class="card" style="display: none;">
-            <h2>🎉 Video Scheduled Successfully!</h2>
-            <p>Your video will be posted on <span id="scheduled-time"></span></p>
-            <div class="video-preview" id="video-preview"></div>
-        </div>
-
-        <!-- Auth Code Display (Existing Functionality) -->
-        <div id="auth-code-section" class="card" style="display: none;">
-            <h3>Authorization Code</h3>
+        
+        <!-- Auth Code Section - Shown after redirect -->
+        <div id="auth-section" class="auth-section">
+            <h2>Authorization Successful!</h2>
+            <p class="success">Your TikTok authorization code has been captured.</p>
+            
+            <h3>Your Authorization Code:</h3>
             <div class="code-display">
-                <code id="auth-code"></code>
-                <button onclick="copyCode()">Copy</button>
+                <span id="auth-code">Loading...</span>
+                <button class="copy-btn" onclick="copyCode()">Copy</button>
             </div>
+            
+            <p><strong>State:</strong> <span id="state-param">Loading...</span></p>
+            <p>You can now close this window and continue with your application.</p>
         </div>
     </div>
 
-    <script src="/js/app.js"></script>
+    <script>
+        // Handle page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            
+            // Check if we're in callback mode
+            if (code) {
+                // Show auth section
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('auth-section').style.display = 'block';
+                
+                // Display code and state
+                document.getElementById('auth-code').textContent = code;
+                document.getElementById('state-param').textContent = state || 'Not provided';
+            }
+            
+            // Set up login button
+            document.getElementById('login-btn').addEventListener('click', initiateOAuth);
+        });
+        
+        // Start OAuth flow
+        function initiateOAuth() {
+            // Generate state for security
+            const state = generateRandomString(16);
+            
+            // Build auth URL (replace with your client key)
+            const params = new URLSearchParams({
+                client_key: 'sbawbj2jcdabtqkzi0', // Replace with your client key
+                response_type: 'code',
+                redirect_uri: window.location.href,
+                scope: 'video.upload,user.info.basic',
+                state: state
+            });
+            
+            // Redirect to TikTok
+            window.location.href = `https://www.tiktok.com/v2/auth/authorize/?${params.toString()}`;
+        }
+        
+        // Generate random string for state parameter
+        function generateRandomString(length) {
+            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let text = '';
+            for (let i = 0; i < length; i++) {
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return text;
+        }
+        
+        // Copy authorization code
+        function copyCode() {
+            const codeText = document.getElementById('auth-code').textContent;
+            navigator.clipboard.writeText(codeText)
+                .then(() => alert('Code copied to clipboard!'))
+                .catch(() => {
+                    // Fallback for browsers that don't support clipboard API
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Code copied to clipboard!');
+                });
+        }
+    </script>
 </body>
 </html>
