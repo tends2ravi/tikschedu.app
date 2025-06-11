@@ -36,10 +36,10 @@
         .active { display: block; }
         .loading { display: none; padding: 2rem; }
         .spinner { width: 40px; height: 40px; margin: 0 auto 1rem; border: 4px solid rgba(0,0,0,0.1); border-radius: 50%; border-top-color: var(--primary-color); animation: spin 1s linear infinite; }
-        .alert { padding: 1.25rem; border-radius: 12px; margin: 1.5rem 0; border-left: 5px solid; }
+        .alert { padding: 1.25rem; border-radius: 12px; margin: 1.5rem 0; border-left: 5px solid; text-align: left;}
         .alert-success { background: rgba(40,167,69,0.1); border-left-color: var(--success-green); }
         .alert-error { background: rgba(220,53,69,0.1); border-left-color: var(--error-red); }
-        .token-display { background: #f0f0f0; padding: 1rem; border-radius: 8px; word-break: break-all; text-align: left; position: relative; }
+        .token-display { background: #f0f0f0; padding: 1rem; border-radius: 8px; word-break: break-all; text-align: left; position: relative; margin-top: 1rem; }
         .footer { margin-top: 2rem; font-size: 0.9rem; color: #888; }
         .footer a { color: #555; text-decoration: none; margin: 0 10px; }
         .footer a:hover { text-decoration: underline; }
@@ -49,7 +49,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Your New, Original Icon SVG can go here -->
         <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 3H6.5C4.29086 3 2.5 4.79086 2.5 7V17C2.5 19.2091 4.29086 21 6.5 21H17.5C19.7091 21 21.5 19.2091 21.5 17V7C21.5 4.79086 19.7091 3 17.5 3Z" stroke="#4A90E2" stroke-width="1.5"/><path d="M15.5 12L10.5 9.26795V14.7321L15.5 12Z" stroke="#4A90E2" stroke-width="1.5" stroke-linejoin="round"/></svg>
         
         <div id="login-section" class="section active">
@@ -77,22 +76,21 @@
                 <p>Your authorization code is ready. Copy it to continue in your application.</p>
             </div>
             <div class="token-display">
-                <code id="auth-code"></code>
+                <strong>Code:</strong> <code id="auth-code"></code>
             </div>
             <button id="copy-btn" class="btn">Copy Code</button>
         </div>
     </div>
 
-    <!-- The Legal Links Footer -->
     <footer class="footer">
         <p>
-            <a href="./terms-of-service.html" target="_blank">Terms of Service</a> | 
-            <a href="./privacy-policy.html" target="_blank">Privacy Policy</a>
+            <a href="./terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> | 
+            <a href="./privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
         </p>
     </footer>
 
     <script>
-        const CLIENT_KEY = 'sbawbj2jcdabtqkzi0'; // Your client key
+        const CLIENT_KEY = 'sbawbj2jcdabtqkzi0'; // Your client key from the TikTok Developer Portal
         const REDIRECT_URI = window.location.href.split('?')[0];
         const sections = {
             login: document.getElementById('login-section'),
@@ -101,68 +99,89 @@
             success: document.getElementById('success-section')
         };
 
+        // --- PKCE Helper Functions (Correct Implementation) ---
         function generateCodeVerifier() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
             return Array.from(crypto.getRandomValues(new Uint8Array(64)))
                 .map(byte => chars[byte % chars.length])
                 .join('');
         }
+
         async function generateCodeChallenge(verifier) {
             const data = new TextEncoder().encode(verifier);
             const digest = await crypto.subtle.digest('SHA-256', data);
             return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
                 .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         }
+
+        // --- Main Application Logic ---
         async function startOAuth() {
             showSection('loading');
             try {
-                const state = generateCodeVerifier().slice(0, 16);
-                const codeVerifier = generateCodeVerifier();
+                const state = generateCodeVerifier().slice(0, 16); // A random string for CSRF protection
+                const codeVerifier = generateCodeVerifier(); // The secret string
+
                 sessionStorage.setItem('pkce_state', state);
                 sessionStorage.setItem('pkce_verifier', codeVerifier);
-                const codeChallenge = await generateCodeChallenge(codeVerifier);
-                const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize');
+
+                const codeChallenge = await generateCodeChallenge(codeVerifier); // The hashed and encoded verifier
+                
+                const authUrl = new URL('https://www.tiktok.com/v2/auth/authorize/');
                 authUrl.searchParams.append('client_key', CLIENT_KEY);
                 authUrl.searchParams.append('response_type', 'code');
                 authUrl.searchParams.append('redirect_uri', REDIRECT_URI);
                 authUrl.searchParams.append('scope', 'user.info.basic,video.upload,video.publish');
                 authUrl.searchParams.append('state', state);
                 authUrl.searchParams.append('code_challenge', codeChallenge);
-                authUrl.search_params.append('code_challenge_method', 'S256');
+                authUrl.searchParams.append('code_challenge_method', 'S256');
+
                 window.location.href = authUrl.toString();
             } catch (error) {
-                showError('Could not initiate authorization. Please check your connection and try again.');
+                showError('Could not initiate authorization. Please ensure your browser supports the required crypto functions and try again.');
             }
         }
+
         function handleCallback() {
             const params = new URLSearchParams(window.location.search);
-            if (params.has('error')) {
-                showError(`${params.get('error')}: ${params.get('error_description') || 'An unknown error occurred during authorization.'}`);
+            const code = params.get('code');
+            const state = params.get('state');
+            const error = params.get('error');
+
+            if (error) {
+                const errorDescription = params.get('error_description') || 'An unknown error occurred during authorization.';
+                showError(`${error}: ${errorDescription}`);
                 return;
             }
-            if (!params.has('code')) {
+
+            if (!code) {
                 showSection('login');
                 return;
             }
-            if (params.get('state') !== sessionStorage.getItem('pkce_state')) {
-                showError('Security check failed (state mismatch). Please try again.');
+
+            if (state !== sessionStorage.getItem('pkce_state')) {
+                showError('Security check failed (state mismatch). This could be a cross-site request forgery attempt. Please try again.');
                 return;
             }
-            document.getElementById('auth-code').textContent = params.get('code');
+
+            document.getElementById('auth-code').textContent = code;
             showSection('success');
         }
+
         function showSection(sectionId) {
             Object.values(sections).forEach(s => s.classList.remove('active'));
             sections[sectionId].classList.add('active');
         }
+
         function showError(message) {
             document.getElementById('error-message').textContent = message;
             showSection('error');
         }
+
         function copyCode() {
             navigator.clipboard.writeText(document.getElementById('auth-code').textContent)
                 .then(() => alert('Authorization code copied to clipboard!'));
         }
+
         document.getElementById('login-btn').addEventListener('click', startOAuth);
         document.getElementById('retry-btn').addEventListener('click', () => window.location.href = REDIRECT_URI);
         document.getElementById('copy-btn').addEventListener('click', copyCode);
