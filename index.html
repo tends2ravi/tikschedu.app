@@ -6,204 +6,111 @@
     name="viewport"
     content="width=device-width, initial-scale=1"
   />
-  <title>Clip Planner — TikTok Login</title>
-  <meta
-    name="description"
-    content="Secure TikTok login with PKCE and minimal scopes to schedule and publish videos."
-  />
+  <title>VidQueue — TikTok Login</title>
+  <meta name="description" content="Secure TikTok login with PKCE and minimal scopes to schedule and publish videos." />
   <style>
-    :root {
-      --primary: #4a90e2;
-      --bg: #f6f7f9;
-      --text: #2f2f33;
-      --muted: #6b7280;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --card: #ffffff;
-    }
+    :root { --primary: #4a90e2; --bg: #f4f4f4; --text: #333; --muted:#6b7280; --success:#28a745; --danger:#dc3545; --card:#fff; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px;
-    }
-    .container {
-      width: 100%;
-      max-width: 640px;
-      background: var(--card);
-      border-radius: 16px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
-      padding: 28px;
-      margin-top: 20px;
-    }
-    .logo {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 12px;
-      display: block;
-    }
-    h1 {
-      margin: 8px 0 12px;
-      font-size: 24px;
-      text-align: center;
-    }
-    p.lead {
-      margin: 0 auto 20px;
-      text-align: center;
-      color: var(--muted);
-      max-width: 42ch;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 14px 20px;
-      border-radius: 12px;
-      border: none;
-      background: var(--primary);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-    }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(74,144,226,0.35); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: none; transform: none; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .row {
-      display: flex; align-items: center; gap: 14px;
-    }
-    .avatar {
-      width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #eee;
-    }
-    .small { color: var(--muted); font-size: 12px; }
-    .card {
-      background: #f3f4f6;
-      border-radius: 12px;
-      padding: 14px;
-      margin: 12px 0;
-      word-break: break-word;
-    }
-    .alert {
-      border-left: 4px solid;
-      padding: 12px 14px;
-      border-radius: 10px;
-      margin: 12px 0;
-      background: #f9fafb;
-    }
-    .alert.success { border-left-color: var(--success); }
-    .alert.error { border-left-color: var(--danger); }
-    .footer {
-      margin-top: 18px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .footer a {
-      color: var(--muted);
-      text-decoration: none;
-      margin: 0 8px;
-    }
-    .footer a:hover { text-decoration: underline; }
-    .center { text-align: center; }
-    .spinner {
-      width: 40px; height: 40px; border-radius: 50%;
-      border: 4px solid rgba(0,0,0,0.08);
-      border-top-color: var(--primary);
-      animation: spin 1s linear infinite;
-      margin: 16px auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    body { margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--text);
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px; }
+    .container { width:100%; max-width:640px; background:var(--card); border-radius:16px; box-shadow:0 12px 30px rgba(0,0,0,0.08); padding:28px; margin-top:20px; }
+    .logo { width:64px; height:64px; margin:0 auto 12px; display:block; }
+    h1 { margin:8px 0 12px; font-size:24px; text-align:center; }
+    p.lead { margin:0 auto 20px; text-align:center; color:var(--muted); max-width:42ch; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; padding:14px 20px; border-radius:12px; border:none; background:var(--primary); color:#fff; font-weight:600; cursor:pointer; transition:.15s ease; }
+    .btn:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(74,144,226,.35); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; box-shadow:none; transform:none; }
+    .section { display:none; }
+    .section.active { display:block; }
+    .center { text-align:center; }
+    .spinner { width:40px; height:40px; border-radius:50%; border:4px solid rgba(0,0,0,.08); border-top-color:var(--primary); animation:spin 1s linear infinite; margin:16px auto; }
+    .alert { border-left:4px solid; padding:12px 14px; border-radius:10px; margin:12px 0; background:#f9fafb; }
+    .alert.success { border-left-color:var(--success); }
+    .alert.error { border-left-color:var(--danger); }
+    .card { background:#f3f4f6; border-radius:12px; padding:14px; margin:12px 0; word-break:break-word; }
+    .footer { margin-top:18px; text-align:center; color:var(--muted); font-size:14px; }
+    .footer a { color:var(--muted); text-decoration:none; margin:0 8px; }
+    .footer a:hover { text-decoration:underline; }
+    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Simple neutral icon (not TikTok-branded) -->
+    <!-- Neutral app icon (not TikTok-branded) -->
     <svg class="logo" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3" y="3" width="18" height="18" rx="4" stroke="#4A90E2" stroke-width="1.6"/>
       <path d="M10 8v8l6-4-6-4z" stroke="#4A90E2" stroke-width="1.6" stroke-linejoin="round"/>
     </svg>
 
-    <h1>Clip Planner</h1>
-    <p class="lead">Sign in with TikTok, see your basic profile, and proceed to upload and publish videos from your app workflow.</p>
+    <h1>Welcome to VidQueue</h1>
+    <p class="lead">Sign in with TikTok, capture the authorization code, then continue your upload and publish flow from your app.</p>
 
     <!-- Login section -->
     <div id="login-section" class="section active center">
       <button id="login-btn" class="btn">Continue with TikTok</button>
     </div>
 
-    <!-- Loading section -->
+    <!-- Loading -->
     <div id="loading-section" class="section center">
       <div class="spinner"></div>
-      <div class="small">Authorizing…</div>
+      <div style="color:#6b7280;">Authorizing…</div>
     </div>
 
-    <!-- Error section -->
+    <!-- Error -->
     <div id="error-section" class="section">
       <div class="alert error">
         <div style="font-weight:700; margin-bottom:6px;">Authorization Error</div>
         <div id="error-text">Something went wrong.</div>
       </div>
-      <div class="center">
-        <button id="retry-btn" class="btn">Try Again</button>
-      </div>
+      <div class="center"><button id="retry-btn" class="btn">Try Again</button></div>
     </div>
 
     <!-- Success (code captured) -->
     <div id="success-section" class="section">
       <div class="alert success">
         <div style="font-weight:700; margin-bottom:6px;">Authorization Successful</div>
-        <div class="small">Your authorization code is below. The app will also fetch your basic profile to demonstrate user.info.basic.</div>
+        <div style="color:#6b7280;">Your authorization code is below; your app can exchange it server‑side for tokens.</div>
       </div>
       <div class="card">
         <div style="font-weight:600; margin-bottom:6px;">Code</div>
         <code id="auth-code"></code>
       </div>
-    </div>
-
-    <!-- User card (demonstrate user.info.basic) -->
-    <div id="user-card" class="section">
-      <div class="alert success">
-        <div style="font-weight:700; margin-bottom:6px;">Signed-in TikTok User</div>
-        <div class="row">
-          <img id="user-avatar" class="avatar" alt="Avatar" />
-          <div>
-            <div id="user-name" style="font-weight:600;">—</div>
-            <div id="user-openid" class="small">open_id: —</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      <a href="./terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> |
-      <a href="./privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+      <div class="center"><button id="copy-btn" class="btn">Copy Code</button></div>
     </div>
   </div>
 
+  <footer class="footer">
+    <a href="./terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> |
+    <a href="./privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+  </footer>
+
   <script>
-    // Configuration: set your client key and, if available, your backend API base
-    const CONFIG = {
-      CLIENT_KEY: 'sbawbj2jcdabtqkzi0', // your TikTok client key
-      API_BASE: '' // e.g., 'https://your-backend.example.com' if you host token exchange there
-    };
+    // IMPORTANT: Use the exact Client Key from TikTok Developer Portal (Login Kit app)
+    const CLIENT_KEY = 'sbawbj2jcdabtqkzi0';
+
+    // Normalize GitHub Pages URL to avoid index.html vs trailing slash mismatches
+    function computeRedirectUri() {
+      const url = new URL(window.location.href);
+      // If path ends with /index.html, strip it so the registered URI can be the folder path with trailing slash
+      if (url.pathname.endsWith('/index.html')) {
+        url.pathname = url.pathname.replace(/\\/index\\.html$/, '/');
+      }
+      // Remove query/hash for a clean registered URI
+      url.search = '';
+      url.hash = '';
+      return url.toString();
+    }
+    const REDIRECT_URI = computeRedirectUri();
 
     const sections = {
       login: document.getElementById('login-section'),
       loading: document.getElementById('loading-section'),
       error: document.getElementById('error-section'),
-      success: document.getElementById('success-section'),
-      user: document.getElementById('user-card')
+      success: document.getElementById('success-section')
     };
 
-    const REDIRECT_URI = window.location.href.split('?')[0]; // must exactly match registered Login Kit redirect URI
+    function show(id) { Object.values(sections).forEach(s => s.classList.remove('active')); sections[id].classList.add('active'); }
+    function showError(msg) { document.getElementById('error-text').textContent = msg || 'Unknown error.'; show('error'); }
 
     // PKCE helpers
     function base64UrlEncode(bytes) {
@@ -214,34 +121,23 @@
       }
       return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
-
     function generateCodeVerifier() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
       const arr = new Uint8Array(64);
       crypto.getRandomValues(arr);
       return Array.from(arr, b => chars[b % chars.length]).join('');
     }
-
-    async function generateCodeChallenge(codeVerifier) {
-      const data = new TextEncoder().encode(codeVerifier);
+    async function generateCodeChallenge(verifier) {
+      const data = new TextEncoder().encode(verifier);
       const digest = await crypto.subtle.digest('SHA-256', data);
       return base64UrlEncode(new Uint8Array(digest));
-    }
-
-    function show(id) {
-      Object.values(sections).forEach(s => s.classList.remove('active'));
-      sections[id].classList.add('active');
-    }
-
-    function showError(msg) {
-      document.getElementById('error-text').textContent = msg || 'Unknown error.';
-      show('error');
     }
 
     async function startOAuth() {
       try {
         show('loading');
 
+        // Mandatory: distinct state and code_verifier
         const state = generateCodeVerifier().slice(0, 16);
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -250,10 +146,9 @@
         sessionStorage.setItem('pkce_verifier', codeVerifier);
 
         const params = new URLSearchParams({
-          client_key: CONFIG.CLIENT_KEY,
+          client_key: CLIENT_KEY,
           response_type: 'code',
           redirect_uri: REDIRECT_URI,
-          // Minimal scopes only: basic identity + content posting flow
           scope: 'user.info.basic,video.upload,video.publish',
           state,
           code_challenge: codeChallenge,
@@ -266,15 +161,16 @@
       }
     }
 
-    async function handleCallback() {
+    function handleCallback() {
       const qs = new URLSearchParams(window.location.search);
       const code = qs.get('code');
       const state = qs.get('state');
       const err = qs.get('error');
+      const errDesc = qs.get('error_description');
 
       if (err) {
-        const desc = qs.get('error_description') || 'Authorization rejected.';
-        showError(err + ': ' + desc);
+        // If TikTok shows “client_key” error page, it usually means the key is wrong or not allowed for this redirect URI
+        showError((errDesc ? errDesc + ' — ' : '') + 'Error: ' + err + '. Check Client Key and Redirect URI in the Developer Portal.');
         return;
       }
 
@@ -285,65 +181,16 @@
         return;
       }
 
-      // Show the code to confirm successful auth
       document.getElementById('auth-code').textContent = code;
       show('success');
-
-      // If a backend is configured, exchange the code for a token and fetch the user profile
-      if (CONFIG.API_BASE) {
-        try {
-          const token = await exchangeToken(code, sessionStorage.getItem('pkce_verifier'));
-          sessionStorage.setItem('tiktok_access_token', token.access_token || '');
-
-          const profile = await fetchUserInfo(token.access_token);
-          renderUser(profile);
-        } catch (e) {
-          // Keep the success section (code captured) visible even if profile fetch fails
-          console.warn('Profile fetch failed:', e);
-        }
-      }
-    }
-
-    async function exchangeToken(code, codeVerifier) {
-      const res = await fetch(CONFIG.API_BASE + '/api/tiktok/exchange', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          code,
-          code_verifier: codeVerifier,
-          redirect_uri: REDIRECT_URI
-        })
-      });
-      if (!res.ok) throw new Error('Token exchange failed with status ' + res.status);
-      return res.json();
-    }
-
-    async function fetchUserInfo(accessToken) {
-      // Prefer back-end proxy to avoid CORS; if your backend directly calls TikTok, this route returns JSON
-      const res = await fetch(CONFIG.API_BASE + '/api/tiktok/userinfo', {
-        headers: { Authorization: 'Bearer ' + accessToken }
-      });
-      if (!res.ok) throw new Error('User info failed with status ' + res.status);
-      return res.json();
-    }
-
-    function renderUser(userJson) {
-      try {
-        // Adapt to your backend response shape; example assumes:
-        // { data: { user: { open_id, display_name, avatar_url } } }
-        const u = userJson?.data?.user || {};
-        document.getElementById('user-avatar').src = u.avatar_url || '';
-        document.getElementById('user-name').textContent = u.display_name || '(no display name)';
-        document.getElementById('user-openid').textContent = 'open_id: ' + (u.open_id || '(missing)');
-        sections.user.classList.add('active');
-      } catch {
-        // Silent fail; code already shown
-      }
     }
 
     document.getElementById('login-btn').addEventListener('click', startOAuth);
     document.getElementById('retry-btn').addEventListener('click', () => location.href = REDIRECT_URI);
-
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      const val = document.getElementById('auth-code').textContent;
+      navigator.clipboard.writeText(val).then(() => alert('Authorization code copied.'));
+    });
     window.addEventListener('load', handleCallback);
   </script>
 </body>
