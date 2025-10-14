@@ -45,7 +45,7 @@
     <h1>Welcome to VidQueue</h1>
     <p class="lead">Sign in with TikTok, capture the authorization code, then continue your upload and publish flow from your app.</p>
 
-    <!-- Login section -->
+    <!-- Login -->
     <div id="login-section" class="section active center">
       <button id="login-btn" class="btn">Continue with TikTok</button>
     </div>
@@ -85,20 +85,18 @@
   </footer>
 
   <script>
-    // IMPORTANT: Use the exact Client Key from TikTok Developer Portal (Login Kit app)
+    // 1) Use the exact Client Key from TikTok Developer Portal (Login Kit app)
     const CLIENT_KEY = 'sbawbj2jcdabtqkzi0';
 
-    // Normalize GitHub Pages URL to avoid index.html vs trailing slash mismatches
+    // 2) Build a redirect URI that matches what you registered (HTTPS, static, no params/hash)
     function computeRedirectUri() {
-      const url = new URL(window.location.href);
-      // If path ends with /index.html, strip it so the registered URI can be the folder path with trailing slash
-      if (url.pathname.endsWith('/index.html')) {
-        url.pathname = url.pathname.replace(/\\/index\\.html$/, '/');
-      }
-      // Remove query/hash for a clean registered URI
-      url.search = '';
-      url.hash = '';
-      return url.toString();
+      const u = new URL(window.location.href);
+      // Strip index.html (GitHub Pages often serves /path/ as the canonical)
+      u.pathname = u.pathname.replace(/\/index\.html$/, '/');
+      // Remove query and hash to keep it static as required
+      u.search = '';
+      u.hash = '';
+      return u.toString();
     }
     const REDIRECT_URI = computeRedirectUri();
 
@@ -108,7 +106,6 @@
       error: document.getElementById('error-section'),
       success: document.getElementById('success-section')
     };
-
     function show(id) { Object.values(sections).forEach(s => s.classList.remove('active')); sections[id].classList.add('active'); }
     function showError(msg) { document.getElementById('error-text').textContent = msg || 'Unknown error.'; show('error'); }
 
@@ -137,7 +134,6 @@
       try {
         show('loading');
 
-        // Mandatory: distinct state and code_verifier
         const state = generateCodeVerifier().slice(0, 16);
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -149,7 +145,7 @@
           client_key: CLIENT_KEY,
           response_type: 'code',
           redirect_uri: REDIRECT_URI,
-          scope: 'user.info.basic,video.upload,video.publish',
+          scope: 'user.info.basic,video.upload,video.publish', // minimal set for your demo
           state,
           code_challenge: codeChallenge,
           code_challenge_method: 'S256'
@@ -169,18 +165,14 @@
       const errDesc = qs.get('error_description');
 
       if (err) {
-        // If TikTok shows “client_key” error page, it usually means the key is wrong or not allowed for this redirect URI
         showError((errDesc ? errDesc + ' — ' : '') + 'Error: ' + err + '. Check Client Key and Redirect URI in the Developer Portal.');
         return;
       }
-
       if (!code) { show('login'); return; }
-
       if (state !== sessionStorage.getItem('pkce_state')) {
         showError('Security check failed (state mismatch). Please retry.');
         return;
       }
-
       document.getElementById('auth-code').textContent = code;
       show('success');
     }
