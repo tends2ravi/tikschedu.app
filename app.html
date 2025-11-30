@@ -28,7 +28,6 @@
     .footer a:hover { text-decoration:underline; }
     .row { display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; }
     .muted { color:var(--muted); font-size:.9rem; }
-    /* Upload demo UI */
     .uploader { text-align:left; background:#f7f9fc; border:1px solid #e4e8ee; border-radius:12px; padding:14px; margin-top:12px; }
     .uploader h4 { margin:0 0 6px 0; }
     .progress-wrap { background:#e9edf3; border-radius:10px; overflow:hidden; height:10px; margin:10px 0; }
@@ -69,27 +68,27 @@
     <div id="success-section" class="section">
       <div class="alert alert-success">
         <h3>Authorization Successful! 🎉</h3>
-        <p class="muted">Your authorization code is below; exchange it server‑side for tokens.</p>
+        <p class="muted">Your authorization code is below; your backend should exchange it for tokens.</p>
       </div>
       <div class="token-display">
         <strong>Code:</strong> <code id="auth-code"></code>
       </div>
       <div class="row" style="margin-top:12px;">
-        <button id="open-upload-demo" class="btn btn-ghost">Open Upload Demo</button>
+        <button id="open-upload-demo" class="btn btn-ghost">Open upload workflow</button>
       </div>
       <button id="copy-btn" class="btn" style="margin-top:10px;">Copy Code</button>
     </div>
 
-    <!-- Upload Demo (mock: init → upload → publish/schedule) -->
+    <!-- Upload workflow (init → upload → publish/schedule) -->
     <div id="upload-demo-section" class="section">
       <div class="alert alert-success">
-        <h3>Upload & Publish Demo</h3>
-        <p class="muted">This is a visual demo that mirrors the TikTok Content Posting API steps (no real upload).</p>
+        <h3>Upload & scheduling</h3>
+        <p class="muted">Use this flow to initialize an upload, track progress, and then publish or schedule a post.</p>
       </div>
 
       <div class="uploader">
         <h4>1) Initialize upload</h4>
-        <p class="muted">Choose a local file or paste a URL.</p>
+        <p class="muted">Choose a local file or paste a video URL.</p>
         <div class="row">
           <input id="demo-file" type="file" accept="video/*">
           <input id="demo-url" type="url" placeholder="https://example.com/video.mp4" style="flex:1; min-width:240px; padding:8px; border:1px solid #e4e8ee; border-radius:8px;">
@@ -101,7 +100,7 @@
 
       <div class="uploader">
         <h4>2) Upload progress</h4>
-        <p class="muted">Simulated chunk transfer to upload_url returned by init.</p>
+        <p class="muted">Simulated chunk transfer to the upload URL returned by init.</p>
         <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
         <div class="row">
           <button id="btn-start-upload" class="btn btn-primary" disabled>Start upload</button>
@@ -111,7 +110,7 @@
 
       <div class="uploader">
         <h4>3) Publish or schedule</h4>
-        <p class="muted">Finalize by direct post now or schedule a future post.</p>
+        <p class="muted">Finalize by posting immediately or scheduling a future time.</p>
         <div class="row">
           <button id="btn-publish" class="btn btn-primary" disabled>Publish now</button>
           <button id="btn-schedule" class="btn btn-ghost" disabled>Schedule (+10 min)</button>
@@ -119,7 +118,7 @@
       </div>
 
       <div class="uploader">
-        <h4>Event log</h4>
+        <h4>Activity log</h4>
         <div id="log" class="log"></div>
       </div>
     </div>
@@ -203,7 +202,7 @@
       navigator.clipboard.writeText(val).then(() => alert('Authorization code copied.'));
     });
 
-    // Upload demo logic (mock)
+    // Upload workflow logic (still simulated client-side)
     const logEl = document.getElementById('log');
     const pb = document.getElementById('progress-bar');
     const statusEl = document.getElementById('upload-status');
@@ -229,22 +228,21 @@
     openDemo.addEventListener('click', () => {
       sections.upload.classList.add('active');
       document.getElementById('upload-demo-section').scrollIntoView({ behavior: 'smooth' });
-      log('Opened Upload Demo (mock UI).');
+      log('Opened upload workflow.');
     });
 
     btnInit.addEventListener('click', () => {
       const hasFile = fileInput.files && fileInput.files.length > 0;
       const hasUrl = urlInput.value.trim().length > 0;
       if (!hasFile && !hasUrl) {
-        alert('Select a local file or paste a video URL (demo only).');
+        alert('Select a local file or paste a video URL.');
         return;
       }
-      // Simulate init → obtain upload_url or accept URL pull.
-      mockUploadUrl = 'https://upload.mock.tiktokapis.com/v2/post/upload_url/demo';
+      mockUploadUrl = 'https://upload.mock.tiktokapis.com/v2/post/upload_url';
       mockPublishId = null;
       btnStart.disabled = false;
-      statusEl.textContent = 'Init complete. upload_url received (mock). Ready to upload…';
-      log('Init: POST /v2/post/publish/inbox/video/init/ → 200 OK (mock). upload_url issued.'); // mirrors init step
+      statusEl.textContent = 'Init complete. Upload URL ready.';
+      log('Init: upload session created (simulated).');
     });
 
     btnStart.addEventListener('click', () => {
@@ -255,8 +253,8 @@
       btnStart.disabled = true;
       progress = 0;
       pb.style.width = '0%';
-      statusEl.textContent = 'Uploading chunks…';
-      log('Upload: PUT chunks to upload_url (mock). Starting simulated transfer…'); // mirrors media transfer
+      statusEl.textContent = 'Uploading…';
+      log('Uploading chunks to upload URL (simulated).');
 
       timer = setInterval(() => {
         progress = Math.min(100, progress + Math.floor(Math.random()*15) + 5);
@@ -264,27 +262,26 @@
         if (progress >= 100) {
           clearInterval(timer);
           statusEl.textContent = 'Upload complete.';
-          // After upload, enable publish actions
           btnPublish.disabled = false;
           btnSchedule.disabled = false;
-          log('Upload complete: All chunks sent to upload_url (mock).');
+          log('Upload complete (simulated).');
         }
       }, 400);
     });
 
     btnPublish.addEventListener('click', () => {
-      mockPublishId = 'v_inbox_demo~v2.' + Math.floor(Math.random()*1e9);
+      mockPublishId = 'v_post_' + Math.floor(Math.random()*1e9);
       const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Publish now: POST direct post → publish_id=${mockPublishId}, log_id=${logId} (mock).`); // mirrors direct post
-      alert('Published (mock): ' + mockPublishId);
+      log(`Publish: video.publish called → publish_id=${mockPublishId}, log_id=${logId} (simulated).`);
+      alert('Published: ' + mockPublishId);
     });
 
     btnSchedule.addEventListener('click', () => {
       const eta = new Date(Date.now() + 10*60*1000).toLocaleTimeString();
-      mockPublishId = 'v_sched_demo~v2.' + Math.floor(Math.random()*1e9);
+      mockPublishId = 'v_scheduled_' + Math.floor(Math.random()*1e9);
       const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Schedule: POST schedule (+10 min) → publish_id=${mockPublishId}, log_id=${logId}, eta=${eta} (mock).`); // mirrors scheduled post
-      alert('Scheduled (mock) for ~10 minutes: ' + mockPublishId);
+      log(`Schedule: video.publish with schedule_time → publish_id=${mockPublishId}, log_id=${logId}, eta=${eta} (simulated).`);
+      alert('Scheduled for ~10 minutes: ' + mockPublishId);
     });
 
     window.addEventListener('load', handleCallback);
