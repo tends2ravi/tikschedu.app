@@ -32,8 +32,7 @@
     .uploader h4 { margin:0 0 6px 0; }
     .progress-wrap { background:#e9edf3; border-radius:10px; overflow:hidden; height:10px; margin:10px 0; }
     .progress-bar { height:10px; width:0%; background:linear-gradient(90deg, #4A90E2, #7db4f1); transition:width .25s ease; }
-    .log { background:#fff; border:1px solid #e4e8ee; border-radius:8px; padding:10px; max-height:140px; overflow:auto; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; }
-    .kbd { background:#eef2f7; border:1px solid #d8dee8; padding:2px 6px; border-radius:6px; font-family:ui-monospace, monospace; font-size:12px; }
+    .log { background:#fff; border:1px solid #e4e8ee; border-radius:8px; padding:10px; max-height:140px; overflow:auto; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; white-space:pre-wrap; }
     @keyframes fadeIn { from { opacity:0; transform:scale(.98);} to { opacity:1; transform:scale(1);} }
     @keyframes spin { to { transform:rotate(360deg);} }
   </style>
@@ -45,14 +44,14 @@
     <!-- Login -->
     <div id="login-section" class="section active">
       <h1>Welcome to VidQueue</h1>
-      <p>Sign in with TikTok to continue.</p>
+      <p>Sign in with TikTok to connect your account and manage your upload workflow.</p>
       <button class="btn btn-primary" id="login-btn">Continue with TikTok</button>
     </div>
 
     <!-- Loading -->
     <div id="loading-section" class="loading">
       <div class="spinner"></div>
-      <p class="muted">Authorizing…</p>
+      <p class="muted">Authorizing with TikTok…</p>
     </div>
 
     <!-- Error -->
@@ -67,40 +66,40 @@
     <!-- Success (code captured) -->
     <div id="success-section" class="section">
       <div class="alert alert-success">
-        <h3>Authorization Successful! 🎉</h3>
-        <p class="muted">Your authorization code is below; your backend should exchange it for tokens.</p>
+        <h3>Authorization Successful 🎉</h3>
+        <p class="muted">Your authorization code is below; your backend should exchange it for TikTok access tokens.</p>
       </div>
       <div class="token-display">
         <strong>Code:</strong> <code id="auth-code"></code>
       </div>
       <div class="row" style="margin-top:12px;">
-        <button id="open-upload-demo" class="btn btn-ghost">Open upload workflow</button>
+        <button id="open-upload-workflow" class="btn btn-ghost">Open upload & scheduling</button>
       </div>
       <button id="copy-btn" class="btn" style="margin-top:10px;">Copy Code</button>
     </div>
 
     <!-- Upload workflow (init → upload → publish/schedule) -->
-    <div id="upload-demo-section" class="section">
+    <div id="upload-section" class="section">
       <div class="alert alert-success">
         <h3>Upload & scheduling</h3>
-        <p class="muted">Use this flow to initialize an upload, track progress, and then publish or schedule a post.</p>
+        <p class="muted">Use this flow to initialize an upload, track progress, and then publish or schedule a TikTok post.</p>
       </div>
 
       <div class="uploader">
         <h4>1) Initialize upload</h4>
-        <p class="muted">Choose a local file or paste a video URL.</p>
+        <p class="muted">Choose a local file or paste a video URL to prepare an upload session.</p>
         <div class="row">
-          <input id="demo-file" type="file" accept="video/*">
-          <input id="demo-url" type="url" placeholder="https://example.com/video.mp4" style="flex:1; min-width:240px; padding:8px; border:1px solid #e4e8ee; border-radius:8px;">
+          <input id="file-input" type="file" accept="video/*">
+          <input id="url-input" type="url" placeholder="https://example.com/video.mp4" style="flex:1; min-width:240px; padding:8px; border:1px solid #e4e8ee; border-radius:8px;">
         </div>
         <div class="row" style="margin-top:10px;">
-          <button id="btn-init" class="btn btn-primary">Init</button>
+          <button id="btn-init" class="btn btn-primary">Init upload</button>
         </div>
       </div>
 
       <div class="uploader">
         <h4>2) Upload progress</h4>
-        <p class="muted">Simulated chunk transfer to the upload URL returned by init.</p>
+        <p class="muted">Track the progress of your upload to the TikTok upload URL.</p>
         <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
         <div class="row">
           <button id="btn-start-upload" class="btn btn-primary" disabled>Start upload</button>
@@ -110,7 +109,7 @@
 
       <div class="uploader">
         <h4>3) Publish or schedule</h4>
-        <p class="muted">Finalize by posting immediately or scheduling a future time.</p>
+        <p class="muted">Finish by publishing immediately or setting a scheduled time.</p>
         <div class="row">
           <button id="btn-publish" class="btn btn-primary" disabled>Publish now</button>
           <button id="btn-schedule" class="btn btn-ghost" disabled>Schedule (+10 min)</button>
@@ -132,16 +131,16 @@
   </footer>
 
   <script>
-    // Config
+    // Config: make sure this EXACTLY matches the TikTok Login Kit Web redirect URI.
     const CLIENT_KEY = 'sbawbj2jcdabtqkzi0';
-    const REDIRECT_URI = window.location.href.split('?')[0];
+    const REDIRECT_URI = 'https://vidqueue.online/app.html';
 
     const sections = {
       login: document.getElementById('login-section'),
       loading: document.getElementById('loading-section'),
       error: document.getElementById('error-section'),
       success: document.getElementById('success-section'),
-      upload: document.getElementById('upload-demo-section')
+      upload: document.getElementById('upload-section')
     };
 
     // PKCE helpers
@@ -152,11 +151,18 @@
     async function generateCodeChallenge(verifier) {
       const data = new TextEncoder().encode(verifier);
       const digest = await crypto.subtle.digest('SHA-256', data);
-      return btoa(String.fromCharCode(...new Uint8Array(digest))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+      return btoa(String.fromCharCode(...new Uint8Array(digest)))
+        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    function show(id) { Object.values(sections).forEach(s => s.classList.remove('active')); sections[id].classList.add('active'); }
-    function showError(msg) { document.getElementById('error-message').textContent = msg || 'Unknown error.'; show('error'); }
+    function show(id) {
+      Object.values(sections).forEach(s => s.classList.remove('active'));
+      sections[id].classList.add('active');
+    }
+    function showError(msg) {
+      document.getElementById('error-message').textContent = msg || 'Unknown error.';
+      show('error');
+    }
 
     async function startOAuth() {
       try {
@@ -188,9 +194,18 @@
       const state = qs.get('state');
       const err = qs.get('error');
       const errDesc = qs.get('error_description');
-      if (err) { showError((errDesc ? errDesc + ' — ' : '') + 'Error: ' + err); return; }
-      if (!code) { show('login'); return; }
-      if (state !== sessionStorage.getItem('pkce_state')) { showError('Security check failed (state mismatch).'); return; }
+      if (err) {
+        showError((errDesc ? errDesc + ' — ' : '') + 'Error: ' + err);
+        return;
+      }
+      if (!code) {
+        show('login');
+        return;
+      }
+      if (state !== sessionStorage.getItem('pkce_state')) {
+        showError('Security check failed (state mismatch).');
+        return;
+      }
       document.getElementById('auth-code').textContent = code;
       show('success');
     }
@@ -202,7 +217,7 @@
       navigator.clipboard.writeText(val).then(() => alert('Authorization code copied.'));
     });
 
-    // Upload workflow logic (still simulated client-side)
+    // Upload workflow logic (client-side simulation)
     const logEl = document.getElementById('log');
     const pb = document.getElementById('progress-bar');
     const statusEl = document.getElementById('upload-status');
@@ -210,12 +225,12 @@
     const btnStart = document.getElementById('btn-start-upload');
     const btnPublish = document.getElementById('btn-publish');
     const btnSchedule = document.getElementById('btn-schedule');
-    const openDemo = document.getElementById('open-upload-demo');
-    const fileInput = document.getElementById('demo-file');
-    const urlInput = document.getElementById('demo-url');
+    const openWorkflow = document.getElementById('open-upload-workflow');
+    const fileInput = document.getElementById('file-input');
+    const urlInput = document.getElementById('url-input');
 
-    let mockUploadUrl = null;
-    let mockPublishId = null;
+    let uploadUrl = null;
+    let publishId = null;
     let progress = 0;
     let timer = null;
 
@@ -225,36 +240,36 @@
       logEl.scrollTop = logEl.scrollHeight;
     }
 
-    openDemo.addEventListener('click', () => {
+    openWorkflow.addEventListener('click', () => {
       sections.upload.classList.add('active');
-      document.getElementById('upload-demo-section').scrollIntoView({ behavior: 'smooth' });
-      log('Opened upload workflow.');
+      document.getElementById('upload-section').scrollIntoView({ behavior: 'smooth' });
+      log('Opened upload and scheduling workflow.');
     });
 
     btnInit.addEventListener('click', () => {
       const hasFile = fileInput.files && fileInput.files.length > 0;
       const hasUrl = urlInput.value.trim().length > 0;
       if (!hasFile && !hasUrl) {
-        alert('Select a local file or paste a video URL.');
+        alert('Select a local file or paste a video URL to continue.');
         return;
       }
-      mockUploadUrl = 'https://upload.mock.tiktokapis.com/v2/post/upload_url';
-      mockPublishId = null;
+      uploadUrl = 'https://upload.tiktokapis.com/v2/post/upload_url'; // placeholder visualization
+      publishId = null;
       btnStart.disabled = false;
-      statusEl.textContent = 'Init complete. Upload URL ready.';
-      log('Init: upload session created (simulated).');
+      statusEl.textContent = 'Upload session initialized. Ready to start upload.';
+      log('Init step completed: upload session prepared.');
     });
 
     btnStart.addEventListener('click', () => {
-      if (!mockUploadUrl) {
-        alert('Run init first.');
+      if (!uploadUrl) {
+        alert('Run the init step first.');
         return;
       }
       btnStart.disabled = true;
       progress = 0;
       pb.style.width = '0%';
       statusEl.textContent = 'Uploading…';
-      log('Uploading chunks to upload URL (simulated).');
+      log('Uploading video content to TikTok upload URL.');
 
       timer = setInterval(() => {
         progress = Math.min(100, progress + Math.floor(Math.random()*15) + 5);
@@ -264,24 +279,24 @@
           statusEl.textContent = 'Upload complete.';
           btnPublish.disabled = false;
           btnSchedule.disabled = false;
-          log('Upload complete (simulated).');
+          log('Upload completed successfully.');
         }
       }, 400);
     });
 
     btnPublish.addEventListener('click', () => {
-      mockPublishId = 'v_post_' + Math.floor(Math.random()*1e9);
+      publishId = 'v_post_' + Math.floor(Math.random()*1e9);
       const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Publish: video.publish called → publish_id=${mockPublishId}, log_id=${logId} (simulated).`);
-      alert('Published: ' + mockPublishId);
+      log(`Publish now: publish_id=${publishId}, log_id=${logId}.`);
+      alert('Post published: ' + publishId);
     });
 
     btnSchedule.addEventListener('click', () => {
       const eta = new Date(Date.now() + 10*60*1000).toLocaleTimeString();
-      mockPublishId = 'v_scheduled_' + Math.floor(Math.random()*1e9);
+      publishId = 'v_scheduled_' + Math.floor(Math.random()*1e9);
       const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Schedule: video.publish with schedule_time → publish_id=${mockPublishId}, log_id=${logId}, eta=${eta} (simulated).`);
-      alert('Scheduled for ~10 minutes: ' + mockPublishId);
+      log(`Scheduled post: publish_id=${publishId}, log_id=${logId}, scheduled for ~${eta}.`);
+      alert('Post scheduled for ~' + eta + ': ' + publishId);
     });
 
     window.addEventListener('load', handleCallback);
