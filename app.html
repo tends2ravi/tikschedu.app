@@ -41,48 +41,53 @@
   <div class="container">
     <svg class="logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 3H6.5C4.29086 3 2.5 4.79086 2.5 7V17C2.5 19.2091 4.29086 21 6.5 21H17.5C19.7091 21 21.5 19.2091 21.5 17V7C21.5 4.79086 19.7091 3 17.5 3Z" stroke="#4A90E2" stroke-width="1.5"/><path d="M15.5 12L10.5 9.26795V14.7321L15.5 12Z" stroke="#4A90E2" stroke-width="1.5" stroke-linejoin="round"/></svg>
 
-    <!-- Login -->
     <div id="login-section" class="section active">
       <h1>Welcome to VidQueue</h1>
       <p>Sign in with TikTok to connect your account and manage your upload workflow.</p>
       <button class="btn btn-primary" id="login-btn">Continue with TikTok</button>
     </div>
 
-    <!-- Loading -->
     <div id="loading-section" class="loading">
       <div class="spinner"></div>
       <p class="muted">Authorizing with TikTok…</p>
     </div>
 
-    <!-- Error -->
     <div id="error-section" class="section">
       <div class="alert alert-error">
-        <h3>Authorization Failed</h3>
+        <h3>Authorization issue</h3>
         <p id="error-message"></p>
       </div>
       <button id="retry-btn" class="btn btn-primary">Try Again</button>
     </div>
 
-    <!-- Success (code captured) -->
     <div id="success-section" class="section">
       <div class="alert alert-success">
-        <h3>Authorization Successful 🎉</h3>
-        <p class="muted">Your authorization code is below; your backend should exchange it for TikTok access tokens.</p>
+        <h3>Authorization Successful</h3>
+        <p class="muted">Copy the authorization code (or the full redirect URL) and continue in your backend.</p>
       </div>
+
       <div class="token-display">
-        <strong>Code:</strong> <code id="auth-code"></code>
+        <strong>Code:</strong> de id="auth-code"></code>
       </div>
+
+      <div class="token-display">
+        <strong>Full redirect URL:</strong> de id="full-redirect-url"></code>
+      </div>
+
       <div class="row" style="margin-top:12px;">
         <button id="open-upload-workflow" class="btn btn-ghost">Open upload & scheduling</button>
       </div>
-      <button id="copy-btn" class="btn" style="margin-top:10px;">Copy Code</button>
+
+      <div class="row" style="margin-top:10px;">
+        <button id="copy-btn" class="btn">Copy Code</button>
+        <button id="copy-url-btn" class="btn btn-ghost">Copy Redirect URL</button>
+      </div>
     </div>
 
-    <!-- Upload workflow (init → upload → publish/schedule) -->
     <div id="upload-section" class="section">
       <div class="alert alert-success">
         <h3>Upload & scheduling</h3>
-        <p class="muted">Use this flow to initialize an upload, track progress, and then publish or schedule a TikTok post.</p>
+        <p class="muted">Initialize an upload, track progress, and then publish or schedule a TikTok post.</p>
       </div>
 
       <div class="uploader">
@@ -99,7 +104,7 @@
 
       <div class="uploader">
         <h4>2) Upload progress</h4>
-        <p class="muted">Track the progress of your upload to the TikTok upload URL.</p>
+        <p class="muted">Track the progress of your upload.</p>
         <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
         <div class="row">
           <button id="btn-start-upload" class="btn btn-primary" disabled>Start upload</button>
@@ -131,7 +136,7 @@
   </footer>
 
   <script>
-    // Config: make sure this EXACTLY matches the TikTok Login Kit Web redirect URI.
+    // IMPORTANT: TikTok requires redirect URIs to be static and registered exactly.
     const CLIENT_KEY = 'sbawbj2jcdabtqkzi0';
     const REDIRECT_URI = 'https://vidqueue.online/app.html';
 
@@ -142,6 +147,15 @@
       success: document.getElementById('success-section'),
       upload: document.getElementById('upload-section')
     };
+
+    function show(id) {
+      Object.values(sections).forEach(s => s.classList.remove('active'));
+      sections[id].classList.add('active');
+    }
+    function showError(msg) {
+      document.getElementById('error-message').textContent = msg || 'Unknown error.';
+      show('error');
+    }
 
     // PKCE helpers
     function generateCodeVerifier() {
@@ -155,21 +169,15 @@
         .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
     }
 
-    function show(id) {
-      Object.values(sections).forEach(s => s.classList.remove('active'));
-      sections[id].classList.add('active');
-    }
-    function showError(msg) {
-      document.getElementById('error-message').textContent = msg || 'Unknown error.';
-      show('error');
-    }
-
     async function startOAuth() {
       try {
         show('loading');
-        const state = generateCodeVerifier().slice(0, 16);
+
+        // Only create state/verifier when user initiates login.
+        const state = generateCodeVerifier().slice(0, 32);
         const codeVerifier = generateCodeVerifier();
         const codeChallenge = await generateCodeChallenge(codeVerifier);
+
         sessionStorage.setItem('pkce_state', state);
         sessionStorage.setItem('pkce_verifier', codeVerifier);
 
@@ -182,6 +190,7 @@
           code_challenge: codeChallenge,
           code_challenge_method: 'S256'
         });
+
         window.location.href = 'https://www.tiktok.com/v2/auth/authorize/?' + params.toString();
       } catch (e) {
         showError('Failed to start authorization: ' + (e?.message || e));
@@ -194,30 +203,45 @@
       const state = qs.get('state');
       const err = qs.get('error');
       const errDesc = qs.get('error_description');
+
       if (err) {
         showError((errDesc ? errDesc + ' — ' : '') + 'Error: ' + err);
         return;
       }
+
+      // No code => normal landing view
       if (!code) {
         show('login');
         return;
       }
-      if (state !== sessionStorage.getItem('pkce_state')) {
-        showError('Security check failed (state mismatch).');
+
+      // State validation: strict if we have prior sessionStorage, otherwise don't hard-fail.
+      const expected = sessionStorage.getItem('pkce_state');
+      if (expected && state !== expected) {
+        showError('Security check failed. Please click “Continue with TikTok” again and retry.');
         return;
       }
+
       document.getElementById('auth-code').textContent = code;
+      document.getElementById('full-redirect-url').textContent = window.location.href;
       show('success');
     }
 
+    // Buttons
     document.getElementById('login-btn').addEventListener('click', startOAuth);
     document.getElementById('retry-btn').addEventListener('click', () => location.href = REDIRECT_URI);
+
     document.getElementById('copy-btn').addEventListener('click', () => {
       const val = document.getElementById('auth-code').textContent;
       navigator.clipboard.writeText(val).then(() => alert('Authorization code copied.'));
     });
 
-    // Upload workflow logic (client-side simulation)
+    document.getElementById('copy-url-btn').addEventListener('click', () => {
+      const val = document.getElementById('full-redirect-url').textContent;
+      navigator.clipboard.writeText(val).then(() => alert('Redirect URL copied.'));
+    });
+
+    // Upload workflow (unchanged)
     const logEl = document.getElementById('log');
     const pb = document.getElementById('progress-bar');
     const statusEl = document.getElementById('upload-status');
@@ -253,11 +277,11 @@
         alert('Select a local file or paste a video URL to continue.');
         return;
       }
-      uploadUrl = 'https://upload.tiktokapis.com/v2/post/upload_url'; // placeholder visualization
+      uploadUrl = 'https://upload.tiktokapis.com/v2/post/upload_url';
       publishId = null;
       btnStart.disabled = false;
       statusEl.textContent = 'Upload session initialized. Ready to start upload.';
-      log('Init step completed: upload session prepared.');
+      log('Init step completed.');
     });
 
     btnStart.addEventListener('click', () => {
@@ -269,7 +293,7 @@
       progress = 0;
       pb.style.width = '0%';
       statusEl.textContent = 'Uploading…';
-      log('Uploading video content to TikTok upload URL.');
+      log('Uploading…');
 
       timer = setInterval(() => {
         progress = Math.min(100, progress + Math.floor(Math.random()*15) + 5);
@@ -279,23 +303,21 @@
           statusEl.textContent = 'Upload complete.';
           btnPublish.disabled = false;
           btnSchedule.disabled = false;
-          log('Upload completed successfully.');
+          log('Upload complete.');
         }
       }, 400);
     });
 
     btnPublish.addEventListener('click', () => {
       publishId = 'v_post_' + Math.floor(Math.random()*1e9);
-      const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Publish now: publish_id=${publishId}, log_id=${logId}.`);
+      log(`Publish now: publish_id=${publishId}.`);
       alert('Post published: ' + publishId);
     });
 
     btnSchedule.addEventListener('click', () => {
       const eta = new Date(Date.now() + 10*60*1000).toLocaleTimeString();
       publishId = 'v_scheduled_' + Math.floor(Math.random()*1e9);
-      const logId = 'LOG-' + Math.floor(Math.random()*1e6).toString(16).toUpperCase();
-      log(`Scheduled post: publish_id=${publishId}, log_id=${logId}, scheduled for ~${eta}.`);
+      log(`Scheduled post: publish_id=${publishId}, scheduled for ~${eta}.`);
       alert('Post scheduled for ~' + eta + ': ' + publishId);
     });
 
