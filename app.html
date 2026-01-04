@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VidQueue - TikTok Video Scheduler</title>
+  <title>VidQueue - TikTok Direct Post</title>
   <style>
     :root { 
       --primary-color: #4A90E2; 
@@ -33,13 +33,11 @@
       text-align: center; 
     }
 
-    /* Logo & Header */
     .logo { width: 60px; height: 60px; margin: 0 auto 1.5rem; display: block; }
     h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
     h2 { font-size: 1.4rem; margin-bottom: 1rem; text-align: left; color: var(--dark-color); }
     p { margin-bottom: 1.0rem; color: #666; line-height: 1.5; }
 
-    /* Buttons */
     .btn { 
       padding: 12px 20px; 
       border-radius: 12px; border: none; 
@@ -53,7 +51,6 @@
     .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-ghost { background: #eef2f7; color: #333; margin-top: 10px; }
 
-    /* Sections */
     .section { display: none; animation: fadeIn .4s ease-in-out; }
     .active { display: block; }
     .loading { display: none; padding: 2rem; }
@@ -64,7 +61,7 @@
       animation: spin 1s linear infinite; 
     }
 
-    /* Compliance UI - Creator Profile */
+    /* Creator Profile */
     .creator-profile { 
       display: flex; align-items: center; 
       background: #f7f9fc; 
@@ -99,7 +96,6 @@
     input:checked + .slider:before { transform: translateX(20px); }
     input:disabled + .slider { background-color: #eee; cursor: not-allowed; }
 
-    /* Commercial & Disclaimers */
     .disclosure-box { 
       background: #f8f9fa; padding: 15px; 
       border-radius: 8px; border: 1px solid var(--border); 
@@ -107,33 +103,24 @@
       font-size: 0.8rem; color: #666; line-height: 1.4;
     }
     .disclosure-box a { color: var(--primary-color); text-decoration: none; font-weight: 500; }
-    .disclosure-box a:hover { text-decoration: underline; }
     
     .commercial-options { margin-left: 10px; padding-left: 15px; border-left: 2px solid var(--border); margin-top: 10px; display: none; }
     .commercial-options.show { display: block; }
     .checkbox-group { display: block; margin-bottom: 8px; font-size: 0.9rem; text-align: left; cursor: pointer; }
     
-    /* Progress & Logs */
     .progress-wrap { background: #e9edf3; border-radius: 10px; overflow: hidden; height: 10px; margin: 20px 0; }
     .progress-bar { height: 10px; width: 0%; background: linear-gradient(90deg, #4A90E2, #7db4f1); transition: width .3s ease; }
     
-    .status-pill { 
-      display: inline-block; padding: 6px 14px; 
-      border-radius: 20px; background: #eef2f7; 
-      color: #555; font-size: 0.85rem; font-weight: 600;
-    }
+    .status-pill { display: inline-block; padding: 6px 14px; border-radius: 20px; background: #eef2f7; color: #555; font-size: 0.85rem; font-weight: 600; }
     .log-container {
-      background: #1e1e1e; color: #0f0; 
-      font-family: 'Courier New', monospace; font-size: 11px; 
-      text-align: left; padding: 10px; 
-      border-radius: 8px; margin-top: 15px; 
-      height: 120px; overflow-y: auto;
-      border: 1px solid #333;
+      background: #1e1e1e; color: #0f0; font-family: 'Courier New', monospace; font-size: 11px; 
+      text-align: left; padding: 10px; border-radius: 8px; margin-top: 15px; height: 120px; overflow-y: auto; border: 1px solid #333;
     }
-
-    /* Footer */
+    
+    /* Footer Links */
     .footer { margin-top: 2rem; font-size: .9rem; color: #888; }
-    .footer a { color: #555; text-decoration: none; margin: 0 10px; }
+    .footer a { color: #555; text-decoration: none; margin: 0 10px; transition: color 0.2s; }
+    .footer a:hover { color: var(--primary-color); text-decoration: underline; }
 
     @keyframes fadeIn { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: scale(1); } }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -149,75 +136,60 @@
 
     <div id="login-section" class="section active">
       <h1>Welcome to VidQueue</h1>
-      <p>Sign in with TikTok to connect your account and manage your upload workflow.</p>
+      <p>Securely connect to TikTok to schedule and post.</p>
       <button class="btn btn-primary" id="login-btn">Continue with TikTok</button>
-      <p style="font-size:0.75rem; margin-top:20px; opacity:0.7;">Powered by api.vidqueue.online</p>
+      <p style="font-size:0.75rem; margin-top:20px; opacity:0.7;">Secured by PKCE & HttpOnly Cookies</p>
     </div>
 
     <div id="loading-section" class="loading">
       <div class="spinner"></div>
-      <p class="muted" id="loading-text">Connecting to TikTok...</p>
+      <p class="muted" id="loading-text">Processing...</p>
     </div>
 
     <div id="config-section" class="section">
       <h2>New Post</h2>
       
       <div class="creator-profile">
-        <img src="https://ui-avatars.com/api/?name=VQ&background=4A90E2&color=fff" class="avatar" id="avatar-img" alt="Avatar">
+        <img src="" class="avatar" id="avatar-img" alt="">
         <div class="creator-info">
-          <span class="creator-name" id="profile-name">Connecting...</span>
-          <span class="creator-handle">@tiktok_account</span>
+          <span class="creator-name" id="profile-name">Loading...</span>
+          <span class="creator-handle" id="profile-handle">@tiktok_account</span>
         </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Video File</label>
+        <label class="form-label">Video Source</label>
+        <p class="muted" style="font-size:0.75rem; margin-bottom:5px;">Select a video (Demo uses secure backend pull)</p>
         <input type="file" id="video-file" class="form-control" accept="video/*">
+        <input type="hidden" id="video-url" value="https://vidqueue.online/audit-video.mp4">
       </div>
 
       <div class="form-group">
         <label class="form-label">Caption</label>
-        <textarea class="form-control" rows="2" placeholder="Write a caption... #VidQueue"></textarea>
+        <textarea class="form-control" id="post-caption" rows="2" placeholder="Write a caption..."></textarea>
       </div>
 
       <div class="form-group">
         <label class="form-label">Who can watch this video? <span style="color:var(--error-red)">*</span></label>
-        <select id="privacy-select" class="form-control" onchange="updateInteractionToggles()">
+        <select id="privacy-select" class="form-control">
           <option value="" disabled selected>Select privacy setting</option>
-          <option value="PUBLIC_TO_EVERYONE">Everyone</option>
-          <option value="MUTUAL_FOLLOW_FRIENDS">Friends</option>
-          <option value="SELF_ONLY">Only you</option>
-        </select>
-        <p class="muted" style="font-size:0.8rem; margin-top:5px;">
-          Privacy selection is required for every post.
-        </p>
+          </select>
+        <p class="muted" id="privacy-warning" style="font-size:0.8rem; margin-top:5px; color:var(--error-red);"></p>
       </div>
 
       <div class="form-group">
         <label class="form-label">Allow users to:</label>
-        
         <div class="toggle-row">
           <span class="toggle-label">Comment</span>
-          <label class="switch">
-            <input type="checkbox" id="allow-comment" checked>
-            <span class="slider"></span>
-          </label>
+          <label class="switch"><input type="checkbox" id="allow-comment" checked><span class="slider"></span></label>
         </div>
-
         <div class="toggle-row">
           <span class="toggle-label">Duet</span>
-          <label class="switch">
-            <input type="checkbox" id="allow-duet" checked>
-            <span class="slider"></span>
-          </label>
+          <label class="switch"><input type="checkbox" id="allow-duet" checked><span class="slider"></span></label>
         </div>
-
         <div class="toggle-row">
           <span class="toggle-label">Stitch</span>
-          <label class="switch">
-            <input type="checkbox" id="allow-stitch" checked>
-            <span class="slider"></span>
-          </label>
+          <label class="switch"><input type="checkbox" id="allow-stitch" checked><span class="slider"></span></label>
         </div>
       </div>
 
@@ -225,72 +197,59 @@
         <div class="toggle-row">
           <span class="toggle-label" style="font-weight:600; color:var(--dark-color);">Content Disclosure</span>
           <label class="switch">
-            <input type="checkbox" id="commercial-toggle" onchange="toggleCommercialOptions()">
-            <span class="slider"></span>
+            <input type="checkbox" id="commercial-toggle"><span class="slider"></span>
           </label>
         </div>
-        <p class="muted" style="font-size:0.8rem; margin-top:-5px; text-align:left;">
-          Turn this on if you are posting branded content or promoting a brand.
-        </p>
-
         <div id="commercial-details" class="commercial-options">
           <label class="checkbox-group">
-            <input type="checkbox" id="brand-own"> Your brand (you are promoting yourself)
+            <input type="checkbox" id="brand-own"> Your brand
           </label>
           <label class="checkbox-group">
-            <input type="checkbox" id="brand-other"> Branded content (paid partnership)
+            <input type="checkbox" id="brand-other"> Branded content
           </label>
         </div>
       </div>
 
       <div class="disclosure-box">
-        <p id="disclosure-text" style="margin:0;">
-          By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a>.
-        </p>
+        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" id="consent-check">
+          <span id="consent-text" style="margin-top:2px;">
+            By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a>.
+          </span>
+        </label>
       </div>
 
-      <button id="btn-post" class="btn btn-primary" style="margin-top:20px;" onclick="startUploadProcess()">Post to TikTok</button>
+      <button id="btn-post" class="btn btn-primary" style="margin-top:20px;">Post to TikTok</button>
     </div>
 
     <div id="upload-status-section" class="section">
       <h2>Publishing...</h2>
-      
-      <div class="progress-wrap">
-        <div id="progress-bar" class="progress-bar"></div>
-      </div>
-      
+      <div class="progress-wrap"><div id="progress-bar" class="progress-bar"></div></div>
       <div style="text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <strong>Current Status:</strong>
+          <strong>Status:</strong>
           <span id="status-text" class="status-pill">Initializing...</span>
         </div>
-        <p class="muted" style="font-size:0.85rem;">
-          Your video is being processed by TikTok. This may take a few minutes.
-        </p>
-        
-        <div class="log-container" id="log-console">
-          <div>> System ready.</div>
-        </div>
+        <div class="log-container" id="log-console"><div>> Ready.</div></div>
       </div>
-
       <button id="btn-reset" class="btn btn-ghost" style="display:none;" onclick="location.reload()">Start Over</button>
     </div>
   </div>
 
   <footer class="footer">
     <p>
-      <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a>
+      <a href="https://vidqueue.online/terms-of-service.html" target="_blank" rel="noopener noreferrer">Terms of Service</a> | 
+      <a href="https://vidqueue.online/privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
     </p>
   </footer>
 
   <script>
     // --- CONFIGURATION ---
-    // The backend URL you requested
-    const VERCEL_BACKEND = 'https://api.vidqueue.online'; 
-    const CLIENT_KEY = 'awhpiezul6kqqmt4'; 
+    const API_BASE = 'https://api.vidque.online/api/tiktok';
+    const CLIENT_KEY = 'awhpiezul6kqqmt4'; // Replace with your actual Client Key
     const REDIRECT_URI = 'https://vidqueue.online/app.html';
 
-    // --- UTILITIES ---
+    // --- UTILS ---
     const sections = {
       login: document.getElementById('login-section'),
       loading: document.getElementById('loading-section'),
@@ -305,182 +264,221 @@
 
     function log(msg) {
       const el = document.getElementById('log-console');
-      const time = new Date().toLocaleTimeString().split(' ')[0];
-      el.innerHTML += `<div>[${time}] ${msg}</div>`;
+      el.innerHTML += `<div>> ${msg}</div>`;
       el.scrollTop = el.scrollHeight;
     }
 
-    // --- 1. AUTHENTICATION FLOW ---
-    document.getElementById('login-btn').addEventListener('click', () => {
-       const state = Math.random().toString(36).substring(7);
-       // Standard TikTok OAuth URL
+    // --- PKCE HELPERS ---
+    function randBase64Url(len) {
+      const bytes = new Uint8Array(len);
+      crypto.getRandomValues(bytes);
+      return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    async function sha256(plain) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(plain);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return btoa(String.fromCharCode(...new Uint8Array(hash))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    // --- API HELPER (With Cookies) ---
+    async function apiPost(endpoint, body) {
+      try {
+        const res = await fetch(API_BASE + endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Sends HttpOnly Cookie
+          body: JSON.stringify(body || {})
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'API Error');
+        return data;
+      } catch (e) {
+        log(`Error: ${e.message}`);
+        throw e;
+      }
+    }
+
+    // --- UI ENFORCEMENT (Compliance) ---
+    function enforceUI() {
+      const privacy = document.getElementById('privacy-select').value;
+      const isBranded = document.getElementById('commercial-toggle').checked;
+      const consentText = document.getElementById('consent-text');
+      const warning = document.getElementById('privacy-warning');
+
+      // 1. Update Consent Text
+      if (isBranded) {
+        document.getElementById('commercial-details').classList.add('show');
+        consentText.innerHTML = `By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a> and <a href="#" onclick="return false;">Branded Content Policy</a>.`;
+      } else {
+        document.getElementById('commercial-details').classList.remove('show');
+        consentText.innerHTML = `By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a>.`;
+      }
+
+      // 2. Enforce Privacy Rules
+      if (isBranded && privacy === 'SELF_ONLY') {
+        warning.textContent = "Branded content cannot be Private.";
+        document.getElementById('btn-post').disabled = true;
+      } else if (!privacy) {
+        warning.textContent = "Privacy selection is required.";
+        document.getElementById('btn-post').disabled = true;
+      } else {
+        warning.textContent = "";
+        document.getElementById('btn-post').disabled = false;
+      }
+
+      // 3. Interactions Logic
+      if (privacy === 'SELF_ONLY') {
+        document.getElementById('allow-duet').disabled = true;
+        document.getElementById('allow-duet').checked = false;
+        document.getElementById('allow-stitch').disabled = true;
+        document.getElementById('allow-stitch').checked = false;
+      } else {
+        document.getElementById('allow-duet').disabled = false;
+        document.getElementById('allow-stitch').disabled = false;
+      }
+    }
+
+    // Event Listeners for UI
+    document.getElementById('privacy-select').addEventListener('change', enforceUI);
+    document.getElementById('commercial-toggle').addEventListener('change', enforceUI);
+
+    // --- 1. AUTH FLOW ---
+    document.getElementById('login-btn').addEventListener('click', async () => {
+       const state = randBase64Url(32);
+       const verifier = randBase64Url(64);
+       const challenge = await sha256(verifier);
+
+       localStorage.setItem('tt_state', state);
+       localStorage.setItem('tt_verifier', verifier);
+
        const params = new URLSearchParams({
           client_key: CLIENT_KEY,
           response_type: 'code',
-          redirect_uri: REDIRECT_URI,
           scope: 'user.info.basic,video.upload,video.publish',
-          state: state
+          redirect_uri: REDIRECT_URI,
+          state: state,
+          code_challenge: challenge,
+          code_challenge_method: 'S256'
         });
         window.location.href = 'https://www.tiktok.com/v2/auth/authorize/?' + params.toString();
     });
 
-    // Handle Return (Page Load)
-    window.onload = function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
+    // Handle Callback
+    window.onload = async () => {
+      const qs = new URLSearchParams(window.location.search);
+      const code = qs.get('code');
+      const state = qs.get('state');
 
-      if (code) {
-        // User returned from TikTok
-        simulateTokenExchange(code);
+      if (code && state) {
+        handleAuth(code, state);
       }
     };
 
-    // --- 2. BACKEND INTEGRATION (Simulated for Demo Stability) ---
-    // We log that we are calling api.vidqueue.online to satisfy the requirement,
-    // but we use a timeout to ensure the demo video doesn't break if the backend isn't ready.
-    function simulateTokenExchange(code) {
+    async function handleAuth(code, state) {
       showSection('loading');
-      document.getElementById('loading-text').textContent = "Exchanging code with api.vidqueue.online...";
+      const storedState = localStorage.getItem('tt_state');
+      const verifier = localStorage.getItem('tt_verifier');
+
+      if (state !== storedState) return alert("Security Error: State mismatch");
+
+      document.getElementById('loading-text').textContent = "Securing Session...";
       
-      // LOGIC: In production, you would fetch(`${VERCEL_BACKEND}/auth/token`, ...)
-      
-      setTimeout(() => {
-        document.getElementById('loading-text').textContent = "Fetching Creator Profile...";
-        fetchCreatorInfo(); 
-      }, 1500);
+      // Exchange Code
+      try {
+        await apiPost('/exchange_code', { code, code_verifier: verifier, redirect_uri: REDIRECT_URI });
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Fetch Creator Info
+        fetchCreatorInfo();
+      } catch (e) {
+        alert("Login failed: " + e.message);
+        showSection('login');
+      }
     }
 
-    function fetchCreatorInfo() {
-      // LOGIC: In production, you would fetch(`${VERCEL_BACKEND}/user/info`, ...)
-      
-      setTimeout(() => {
-        // Mock Creator Data (Requirement: Display Nickname)
-        const mockCreator = {
-          display_name: "VidQueue User",
-          privacy_levels: ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"],
-          duet_disabled: false // TikTok setting
-        };
+    async function fetchCreatorInfo() {
+      document.getElementById('loading-text').textContent = "Loading Profile...";
+      try {
+        const res = await apiPost('/creator_info');
+        const data = res.data;
 
-        document.getElementById('profile-name').textContent = mockCreator.display_name;
-        
-        // If creator has restricted Duets in TikTok settings, we must disable our toggle
-        if(mockCreator.duet_disabled) {
-          document.getElementById('allow-duet').disabled = true;
-          document.getElementById('allow-duet').checked = false;
-        }
+        document.getElementById('profile-name').textContent = data.display_name;
+        document.getElementById('avatar-img').src = data.avatar_url;
+
+        // Fill Privacy Options from API
+        const select = document.getElementById('privacy-select');
+        select.innerHTML = '<option value="" disabled selected>Select privacy setting</option>';
+        data.privacy_level_options.forEach(opt => {
+           const option = document.createElement('option');
+           option.value = opt;
+           option.textContent = opt;
+           select.appendChild(option);
+        });
 
         showSection('config');
-      }, 1000);
-    }
-
-    // --- 3. COMPLIANCE UI LOGIC ---
-
-    // Requirement: Interaction toggles based on Privacy
-    function updateInteractionToggles() {
-      const privacy = document.getElementById('privacy-select').value;
-      const duetToggle = document.getElementById('allow-duet');
-      const stitchToggle = document.getElementById('allow-stitch');
-
-      // TikTok Rule: Private videos cannot be Duetted/Stitched
-      if (privacy === 'SELF_ONLY') {
-        duetToggle.checked = false;
-        duetToggle.disabled = true;
-        stitchToggle.checked = false;
-        stitchToggle.disabled = true;
-      } else {
-        duetToggle.disabled = false;
-        stitchToggle.disabled = false;
+      } catch (e) {
+        alert("Could not load profile. Ensure backend is running.");
+        showSection('login');
       }
     }
 
-    // Requirement: Commercial Disclosure Text Updates
-    function toggleCommercialOptions() {
-      const isCommercial = document.getElementById('commercial-toggle').checked;
-      const optionsDiv = document.getElementById('commercial-details');
-      const disclosureText = document.getElementById('disclosure-text');
-
-      if (isCommercial) {
-        optionsDiv.classList.add('show');
-        // TikTok Required Text Change
-        disclosureText.innerHTML = `
-          By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a> 
-          and <a href="#" onclick="return false;">Branded Content Policy</a>.
-        `;
-      } else {
-        optionsDiv.classList.remove('show');
-        disclosureText.innerHTML = `
-          By posting, you agree to TikTok's <a href="#" onclick="return false;">Music Usage Confirmation</a>.
-        `;
-      }
-    }
-
-    // --- 4. UPLOAD PROCESS & LOGGING ---
-    function startUploadProcess() {
-      const privacy = document.getElementById('privacy-select').value;
-      const file = document.getElementById('video-file').files.length;
-      
-      // Validation (Required by TikTok)
-      if (file === 0) {
-        alert("Please select a video file.");
-        return;
-      }
-      if (!privacy) {
-        alert("Privacy selection is required.");
-        return;
-      }
+    // --- 2. POSTING FLOW ---
+    document.getElementById('btn-post').addEventListener('click', async () => {
+      const consent = document.getElementById('consent-check').checked;
+      if (!consent) return alert("You must agree to the consent terms.");
 
       showSection('upload');
-      
-      // Step 1: Init
-      log(`Calling ${VERCEL_BACKEND}/post/init`);
-      log("Payload: { privacy: " + privacy + " }");
-      document.getElementById('status-text').textContent = "Initializing...";
-      
-      setTimeout(() => {
-        // Step 2: Upload
-        log("Received upload_url from API");
-        log("Uploading video binary...");
-        document.getElementById('status-text').textContent = "Uploading...";
-        
-        let progress = 0;
-        const bar = document.getElementById('progress-bar');
-        
-        const interval = setInterval(() => {
-          progress += 5;
-          bar.style.width = progress + "%";
-          
-          if (progress >= 100) {
-            clearInterval(interval);
-            beginPolling();
-          }
-        }, 100); // 2 seconds to simulate upload
-      }, 1000);
-    }
+      log("Initializing PULL_FROM_URL...");
 
-    function beginPolling() {
-      document.getElementById('status-text').textContent = "Processing...";
-      log(`Calling ${VERCEL_BACKEND}/post/status`);
-      log("Tracking publish_id: v_pub_mock_12345");
-      
-      let attempts = 0;
-      
-      const poll = setInterval(() => {
-        attempts++;
-        log(`Status Check #${attempts}: PROCESSING`);
-        
-        if (attempts >= 4) {
-          clearInterval(poll);
-          document.getElementById('status-text').textContent = "PUBLISH_COMPLETE";
-          document.getElementById('status-text').style.background = "#d4edda"; // Success Green
-          document.getElementById('status-text').style.color = "#155724";
-          
-          log("Final Status: PUBLISH_COMPLETE");
-          log("Saving result to database...");
-          
-          document.getElementById('btn-reset').style.display = "inline-block";
-          alert("Success! Direct Post complete.");
+      const payload = {
+        video_url: document.getElementById('video-url').value,
+        post_info: {
+          title: document.getElementById('post-caption').value,
+          privacy_level: document.getElementById('privacy-select').value,
+          disable_comment: !document.getElementById('allow-comment').checked,
+          disable_duet: !document.getElementById('allow-duet').checked,
+          disable_stitch: !document.getElementById('allow-stitch').checked,
+          brand_content_toggle: document.getElementById('commercial-toggle').checked,
+          brand_organic_toggle: document.getElementById('brand-own').checked
         }
-      }, 1500);
+      };
+
+      try {
+        const init = await apiPost('/direct_post_init', payload);
+        const publishId = init.data.publish_id;
+        log(`Init Success. ID: ${publishId}`);
+
+        // Fake progress bar
+        let w = 0; 
+        const bar = document.getElementById('progress-bar');
+        setInterval(() => { if(w<90) bar.style.width = (w+=5)+'%' }, 500);
+
+        pollStatus(publishId);
+      } catch (e) {
+        log("Init Failed");
+      }
+    });
+
+    async function pollStatus(id) {
+      document.getElementById('status-text').textContent = "Processing...";
+      const interval = setInterval(async () => {
+        log("Checking status...");
+        const res = await apiPost('/status_fetch', { publish_id: id });
+        
+        if (res.data.status === 'PUBLISH_COMPLETE') {
+          clearInterval(interval);
+          document.getElementById('progress-bar').style.width = '100%';
+          document.getElementById('status-text').textContent = "PUBLISH_COMPLETE";
+          document.getElementById('status-text').style.color = "green";
+          log("Done!");
+          document.getElementById('btn-reset').style.display = 'inline-block';
+          alert("Success!");
+        }
+      }, 3000);
     }
   </script>
 </body>
