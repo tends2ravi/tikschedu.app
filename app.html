@@ -159,9 +159,8 @@
 
       <div class="form-group">
         <label class="form-label">Video Source</label>
-        <p class="muted" style="font-size:0.75rem; margin-bottom:5px;">Select a video (Demo uses secure backend pull)</p>
+        <p class="muted" style="font-size:0.75rem; margin-bottom:5px;">Select a video file to upload (Direct File Upload Mode)</p>
         <input type="file" id="video-file" class="form-control" accept="video/*">
-        <input type="hidden" id="video-url" value="https://vidqueue.online/audit-video.mp4">
       </div>
 
       <div class="form-group">
@@ -246,7 +245,7 @@
   <script>
     // --- CONFIGURATION ---
     const API_BASE = 'https://api.vidqueue.online/api/tiktok';
-    const CLIENT_KEY = 'awhpiezul6kqqmt4'; // Replace with your actual Client Key
+    const CLIENT_KEY = 'awhpiezul6kqqmt4'; // Your Client Key
     const REDIRECT_URI = 'https://vidqueue.online/app.html';
 
     // --- UTILS ---
@@ -426,42 +425,72 @@
       }
     }
 
-    // --- 2. POSTING FLOW ---
+    // --- 2. POSTING FLOW (FILE_UPLOAD MODE) ---
     document.getElementById('btn-post').addEventListener('click', async () => {
       const consent = document.getElementById('consent-check').checked;
       if (!consent) return alert("You must agree to the consent terms.");
 
-      showSection('upload');
-      log("Initializing PULL_FROM_URL...");
+      startUploadProcess();
+    });
 
-      const payload = {
-        video_url: document.getElementById('video-url').value,
-        post_info: {
-          title: document.getElementById('post-caption').value,
-          privacy_level: document.getElementById('privacy-select').value,
-          disable_comment: !document.getElementById('allow-comment').checked,
-          disable_duet: !document.getElementById('allow-duet').checked,
-          disable_stitch: !document.getElementById('allow-stitch').checked,
-          brand_content_toggle: document.getElementById('commercial-toggle').checked,
-          brand_organic_toggle: document.getElementById('brand-own').checked
-        }
-      };
+    async function startUploadProcess() {
+      const fileInput = document.getElementById('video-file');
+      const file = fileInput.files[0];
+
+      // CRITICAL: You must select a real file now
+      if (!file) return alert("Please select a video file from your computer.");
+      
+      showSection('upload');
+      log("Initializing FILE_UPLOAD...");
+      document.getElementById('status-text').textContent = "Initializing...";
 
       try {
-        const init = await apiPost('/direct_post_init', payload);
+        // 1. Init: Get Upload URL from Backend
+        // Note: We ignore the video_url hidden field now.
+        const init = await apiPost('/direct_post_init', { });
+        
+        if (!init.data || !init.data.upload_url) {
+          throw new Error(init.error || "No upload_url received from TikTok");
+        }
+
+        const uploadUrl = init.data.upload_url;
         const publishId = init.data.publish_id;
         log(`Init Success. ID: ${publishId}`);
 
-        // Fake progress bar
+        // 2. Upload: Send File Directly to TikTok
+        log("Uploading binary to TikTok...");
+        document.getElementById('status-text').textContent = "Uploading...";
+        
+        // Native fetch PUT to TikTok's upload URL
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'video/mp4',
+            'Content-Range': `bytes 0-${file.size - 1}/${file.size}`
+          },
+          body: file
+        });
+
+        if (!uploadRes.ok) {
+           const errText = await uploadRes.text();
+           throw new Error("Upload Failed: " + errText);
+        }
+        
+        log("Binary Upload Complete.");
+
+        // 3. Poll Status
         let w = 0; 
         const bar = document.getElementById('progress-bar');
         setInterval(() => { if(w<90) bar.style.width = (w+=5)+'%' }, 500);
 
         pollStatus(publishId);
+
       } catch (e) {
-        log("Init Failed");
+        log("Error: " + e.message);
+        document.getElementById('status-text').textContent = "Failed";
+        document.getElementById('status-text').style.color = "red";
       }
-    });
+    }
 
     async function pollStatus(id) {
       document.getElementById('status-text').textContent = "Processing...";
