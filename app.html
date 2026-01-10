@@ -355,7 +355,7 @@
        const params = new URLSearchParams({
           client_key: CLIENT_KEY,
           response_type: 'code',
-          // FIX: REMOVE 'video.upload'. USE ONLY 'video.publish'
+          // SCOPE FIXED: REMOVED video.upload
           scope: 'user.info.basic,video.publish', 
           redirect_uri: REDIRECT_URI,
           state: state,
